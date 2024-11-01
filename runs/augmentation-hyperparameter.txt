@@ -1,0 +1,17 @@
+Thông số tối ưu cho hsv_h, hsv_s, hsv_v:
+hsv_h (Hue adjustment factor): 0.1544
+hsv_s (Saturation adjustment factor): 0.3215
+hsv_v (Brightness adjustment factor): 0.1697
+
+Thông số tối ưu cho erasing và crop_fraction:
+erasing: 0.4644
+crop-fraction: 0.1610
+
+Thông số tối ưu cho translate, scale, và shear:
+translate: (0.4987055864093411, 0.5005783380444228)
+scale: 1.000311801948887
+shear: 0.4370710879692321
+
+Thông số tối ưu cho mosaic và mixup:
+mosaic: 0.25
+mixup: 0.49525907153169096

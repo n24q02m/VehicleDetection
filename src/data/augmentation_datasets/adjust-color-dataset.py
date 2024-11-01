@@ -112,15 +112,11 @@ print(f"hsv_s (Saturation adjustment factor): {optimal_hsv_s:.4f}")
 print(f"hsv_v (Brightness adjustment factor): {optimal_hsv_v:.4f}")
 
 # Lưu kết quả các thông số thống kê vào tệp TXT
-output_stats_file = os.path.join(base_path, 'hsv_statistics.txt')
-with open(output_stats_file, 'w') as f:
-    f.write("Thống kê HSV cho toàn bộ tập dữ liệu:\n")
-    f.write(f"Hue - Mean: {stats['h']['mean']:.4f}, Std: {stats['h']['std']:.4f}, Min: {stats['h']['min']:.4f}, Max: {stats['h']['max']:.4f}\n")
-    f.write(f"Saturation - Mean: {stats['s']['mean']:.4f}, Std: {stats['s']['std']:.4f}, Min: {stats['s']['min']:.4f}, Max: {stats['s']['max']:.4f}\n")
-    f.write(f"Value - Mean: {stats['v']['mean']:.4f}, Std: {stats['v']['std']:.4f}, Min: {stats['v']['min']:.4f}, Max: {stats['v']['max']:.4f}\n")
-    f.write("\nCác thông số tối ưu cho tăng cường dữ liệu:\n")
+output_stats_file = os.path.join('runs', 'augmentation-hyperparameter.txt')
+with open(output_stats_file, 'w', encoding='utf-8') as f:
+    f.write("Thông số tối ưu cho hsv_h, hsv_s, hsv_v:\n")
     f.write(f"hsv_h (Hue adjustment factor): {optimal_hsv_h:.4f}\n")
     f.write(f"hsv_s (Saturation adjustment factor): {optimal_hsv_s:.4f}\n")
     f.write(f"hsv_v (Brightness adjustment factor): {optimal_hsv_v:.4f}\n")
 
-print(f"\nĐã lưu kết quả các thông số thống kê vào tệp '{output_stats_file}'")
+print(f"\nĐã lưu kết quả các thông số tối ưu vào tệp '{output_stats_file}'")
