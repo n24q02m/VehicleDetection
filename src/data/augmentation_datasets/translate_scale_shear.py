@@ -20,7 +20,7 @@ def compute_optimal_translate(image_dirs):
             image_path = os.path.join(image_dir, image_file)
             image = Image.open(image_path).convert('RGB')
             width, height = image.size
-            # Tính toán tỷ lệ dịch chuyển tối đa theo chiều rộng và chiều cao
+            # Tính toán tỷ lệ dịch chuyển tối ưu theo chiều rộng và chiều cao
             translate_x = np.random.uniform(0.0, 1.0) * width
             translate_y = np.random.uniform(0.0, 1.0) * height
             translate_x_ratios.append(translate_x / width)
