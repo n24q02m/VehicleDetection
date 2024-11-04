@@ -56,9 +56,30 @@ print("Thông số tối ưu cho mixup:", optimal_mixup)
 
 # Lưu kết quả các thông số tối ưu vào tệp TXT
 output_stats_file = os.path.join('runs', 'augmentation-hyperparameter.txt')
-with open(output_stats_file, 'a', encoding='utf-8') as f:
-    f.write("\nThông số tối ưu cho mosaic và mixup:\n")
-    f.write(f"mosaic: {optimal_mosaic}\n")
-    f.write(f"mixup: {optimal_mixup}\n")
+
+# Đọc nội dung hiện tại của tệp
+if os.path.exists(output_stats_file):
+    with open(output_stats_file, 'r', encoding='utf-8') as f:
+        lines = f.readlines()
+else:
+    lines = []
+
+# Cập nhật hoặc thêm các thông số tối ưu
+with open(output_stats_file, 'w', encoding='utf-8') as f:
+    updated_mosaic = False
+    updated_mixup = False
+    for line in lines:
+        if line.startswith("mosaic"):
+            f.write(f"mosaic {optimal_mosaic}\n")
+            updated_mosaic = True
+        elif line.startswith("mixup"):
+            f.write(f"mixup {optimal_mixup}\n")
+            updated_mixup = True
+        else:
+            f.write(line)
+    if not updated_mosaic:
+        f.write(f"mosaic {optimal_mosaic}\n")
+    if not updated_mixup:
+        f.write(f"mixup {optimal_mixup}\n")
 
 print(f"\nĐã lưu kết quả các thông số tối ưu vào tệp '{output_stats_file}'")

@@ -7,8 +7,8 @@ base_path = os.path.abspath(os.path.join(os.getcwd(), 'data', 'soict-hackathon-2
 train_images_dir = os.path.join(base_path, 'images', 'train')
 valid_images_dir = os.path.join(base_path, 'images', 'val')
 
-# Xác định kích thước ảnh (thay đổi theo kích thước ảnh của bạn)
-image_width, image_height = 1280, 720  # Ví dụ kích thước ảnh là 1280x720
+# Xác định kích thước ảnh
+image_width, image_height = 1280, 720 
 
 # Hàm để tính toán thông số tối ưu cho translate
 def compute_optimal_translate(image_dirs):
@@ -71,10 +71,36 @@ print("Thông số tối ưu cho shear:", optimal_shear)
 
 # Lưu kết quả các thông số tối ưu vào tệp TXT
 output_stats_file = os.path.join('runs', 'augmentation-hyperparameter.txt')
-with open(output_stats_file, 'a', encoding='utf-8') as f:
-    f.write("\nThông số tối ưu cho translate, scale, và shear:\n")
-    f.write(f"translate: {optimal_translate}\n")
-    f.write(f"scale: {optimal_scale}\n")
-    f.write(f"shear: {optimal_shear}\n")
+
+# Đọc nội dung hiện tại của tệp
+if os.path.exists(output_stats_file):
+    with open(output_stats_file, 'r', encoding='utf-8') as f:
+        lines = f.readlines()
+else:
+    lines = []
+
+# Cập nhật hoặc thêm các thông số tối ưu
+with open(output_stats_file, 'w', encoding='utf-8') as f:
+    updated_translate = False
+    updated_scale = False
+    updated_shear = False
+    for line in lines:
+        if line.startswith("translate"):
+            f.write(f"translate {optimal_translate}\n")
+            updated_translate = True
+        elif line.startswith("scale"):
+            f.write(f"scale {optimal_scale}\n")
+            updated_scale = True
+        elif line.startswith("shear"):
+            f.write(f"shear {optimal_shear}\n")
+            updated_shear = True
+        else:
+            f.write(line)
+    if not updated_translate:
+        f.write(f"translate {optimal_translate}\n")
+    if not updated_scale:
+        f.write(f"scale {optimal_scale}\n")
+    if not updated_shear:
+        f.write(f"shear {optimal_shear}\n")
 
 print(f"\nĐã lưu kết quả các thông số tối ưu vào tệp '{output_stats_file}'")

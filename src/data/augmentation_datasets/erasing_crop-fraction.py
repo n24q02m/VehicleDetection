@@ -11,8 +11,8 @@ valid_images_dir = os.path.join(base_path, 'images', 'val')
 train_labels_dir = os.path.join(base_path, 'labels', 'train')
 valid_labels_dir = os.path.join(base_path, 'labels', 'val')
 
-# Xác định kích thước ảnh (thay đổi theo kích thước ảnh của bạn)
-image_width, image_height = 1280, 720  # Ví dụ kích thước ảnh là 1280x720
+# Xác định kích thước ảnh 
+image_width, image_height = 1280, 720  
 
 # Khởi tạo ma trận heatmap
 heatmap_data = np.zeros((image_height, image_width))
@@ -85,9 +85,30 @@ print("Thông số tối ưu cho crop_fraction:", optimal_crop_fraction)
 
 # Lưu kết quả các thông số tối ưu vào tệp TXT
 output_stats_file = os.path.join('runs', 'augmentation-hyperparameter.txt')
-with open(output_stats_file, 'a', encoding='utf-8') as f:
-    f.write("\nThông số tối ưu cho erasing và crop_fraction:\n")
-    f.write(f"erasing: {optimal_erasing:.4f}\n")
-    f.write(f"crop-fraction: {optimal_crop_fraction:.4f}\n")
+
+# Đọc nội dung hiện tại của tệp
+if os.path.exists(output_stats_file):
+    with open(output_stats_file, 'r', encoding='utf-8') as f:
+        lines = f.readlines()
+else:
+    lines = []
+
+# Cập nhật hoặc thêm các thông số tối ưu
+with open(output_stats_file, 'w', encoding='utf-8') as f:
+    updated_erasing = False
+    updated_crop_fraction = False
+    for line in lines:
+        if line.startswith("erasing"):
+            f.write(f"erasing {optimal_erasing:.4f}\n")
+            updated_erasing = True
+        elif line.startswith("crop-fraction"):
+            f.write(f"crop-fraction {optimal_crop_fraction:.4f}\n")
+            updated_crop_fraction = True
+        else:
+            f.write(line)
+    if not updated_erasing:
+        f.write(f"erasing {optimal_erasing:.4f}\n")
+    if not updated_crop_fraction:
+        f.write(f"crop-fraction {optimal_crop_fraction:.4f}\n")
 
 print(f"\nĐã lưu kết quả các thông số tối ưu vào tệp '{output_stats_file}'")

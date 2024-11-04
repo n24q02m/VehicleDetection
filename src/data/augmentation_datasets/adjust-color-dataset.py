@@ -113,10 +113,32 @@ print(f"hsv_v (Brightness adjustment factor): {optimal_hsv_v:.4f}")
 
 # Lưu kết quả các thông số thống kê vào tệp TXT
 output_stats_file = os.path.join('runs', 'augmentation-hyperparameter.txt')
+
+# Đọc nội dung hiện tại của tệp
+if os.path.exists(output_stats_file):
+    with open(output_stats_file, 'r', encoding='utf-8') as f:
+        lines = f.readlines()
+else:
+    lines = []
+
+# Cập nhật hoặc thêm các thông số tối ưu
 with open(output_stats_file, 'w', encoding='utf-8') as f:
-    f.write("Thông số tối ưu cho hsv_h, hsv_s, hsv_v:\n")
-    f.write(f"hsv_h (Hue adjustment factor): {optimal_hsv_h:.4f}\n")
-    f.write(f"hsv_s (Saturation adjustment factor): {optimal_hsv_s:.4f}\n")
-    f.write(f"hsv_v (Brightness adjustment factor): {optimal_hsv_v:.4f}\n")
+    updated = False
+    for line in lines:
+        if line.startswith("hsv_h"):
+            f.write(f"hsv_h {optimal_hsv_h:.4f}\n")
+            updated = True
+        elif line.startswith("hsv_s"):
+            f.write(f"hsv_s {optimal_hsv_s:.4f}\n")
+            updated = True
+        elif line.startswith("hsv_v"):
+            f.write(f"hsv_v {optimal_hsv_v:.4f}\n")
+            updated = True
+        else:
+            f.write(line)
+    if not updated:
+        f.write(f"hsv_h {optimal_hsv_h:.4f}\n")
+        f.write(f"hsv_s {optimal_hsv_s:.4f}\n")
+        f.write(f"hsv_v {optimal_hsv_v:.4f}\n")
 
 print(f"\nĐã lưu kết quả các thông số tối ưu vào tệp '{output_stats_file}'")
