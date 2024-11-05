@@ -1,7 +1,9 @@
 import os
 import zipfile
-from ultralytics import YOLO
 from tqdm import tqdm
+from sahi import AutoDetectionModel
+from sahi.predict import get_sliced_prediction
+import torch
 
 
 def extract_zip(zip_path):
@@ -17,31 +19,55 @@ def extract_zip(zip_path):
 
 
 def predict_images(model_path, images_dir, output_file):
-    # Tải model
-    model = YOLO(model_path)
+    # Load the model with quantization
+    detection_model = AutoDetectionModel.from_pretrained(
+        model_type="yolov8",
+        model_path=model_path,
+        confidence_threshold=0.25,
+        device="cuda:0",
+    )
+    detection_model.model.fuse()
+    detection_model.model.model = torch.quantization.quantize_dynamic(
+        detection_model.model.model,
+        {torch.nn.Linear},
+        dtype=torch.qint8,
+    )
 
-    # Tạo file predict.txt
+    # Open output file
     with open(output_file, "w") as f:
-        # Duyệt qua tất cả các file trong thư mục
+        # Iterate over all image files
         for root, _, files in os.walk(images_dir):
             for file in tqdm(files, desc="Predicting"):
                 if file.lower().endswith((".jpg", ".jpeg", ".png")):
                     image_path = os.path.join(root, file)
 
-                    # Thực hiện predict
-                    results = model.predict(image_path, conf=0.25)
+                    # Perform sliced prediction using SAHI
+                    result = get_sliced_prediction(
+                        image_path,
+                        detection_model,
+                        slice_height=256,
+                        slice_width=256,
+                        overlap_height_ratio=0.2,
+                        overlap_width_ratio=0.2,
+                    )
 
-                    # Ghi kết quả vào file
-                    for result in results:
-                        boxes = result.boxes
-                        for box in boxes:
-                            # Lấy tọa độ và confidence
-                            x, y, w, h = box.xywhn[0].tolist()
-                            conf = box.conf[0].item()
-                            cls = int(box.cls[0].item())
+                    # Get image dimensions from result
+                    image_width = result.image_width
+                    image_height = result.image_height
 
-                            # Ghi theo định dạng yêu cầu
-                            f.write(f"{file} {cls} {x} {y} {w} {h} {conf:.3f}\n")
+                    # Write results to file
+                    for object_prediction in result.object_prediction_list:
+                        # Get bounding box coordinates and confidence
+                        x1, y1, x2, y2 = object_prediction.bbox.to_xyxy()
+                        x_center = ((x1 + x2) / 2) / image_width
+                        y_center = ((y1 + y2) / 2) / image_height
+                        width = (x2 - x1) / image_width
+                        height = (y2 - y1) / image_height
+                        conf = object_prediction.score.value
+                        cls = object_prediction.category.id
+
+                        # Write in the required format
+                        f.write(f"{file} {cls} {x_center} {y_center} {width} {height} {conf:.3f}\n")
 
 
 def zip_output(output_file):
@@ -52,18 +78,18 @@ def zip_output(output_file):
 
 
 def main():
-    # Các đường dẫn
+    # Paths
     test_zip = "./data/public test.zip"
     model_path = "./runs/train-yolov8m-ghost-p2(4)/weights/best.pt"
     output_file = "./data/predict.txt"
 
-    # Giải nén file test
+    # Extract test images
     test_dir = extract_zip(test_zip)
 
-    # Thực hiện predict và ghi kết quả
+    # Perform prediction and write results
     predict_images(model_path, test_dir, output_file)
 
-    # Nén file kết quả
+    # Zip the output file
     zip_output(output_file)
 
     print("Hoàn thành!")
