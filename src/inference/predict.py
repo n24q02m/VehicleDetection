@@ -54,7 +54,7 @@ def zip_output(output_file):
 def main():
     # Các đường dẫn
     test_zip = "./data/public test.zip"
-    model_path = "./runs/train-yolov8s-ghost-edit/weights/best.pt"
+    model_path = "./runs/train-yolov8m-ghost-p2(4)/weights/best.pt"
     output_file = "./data/predict.txt"
 
     # Giải nén file test
