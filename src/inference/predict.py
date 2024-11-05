@@ -45,10 +45,8 @@ def predict_images(model_path, images_dir, output_file):
                     result = get_sliced_prediction(
                         image_path,
                         detection_model,
-                        slice_height=256,
-                        slice_width=256,
-                        overlap_height_ratio=0.2,
-                        overlap_width_ratio=0.2,
+                        slice_height=512,
+                        slice_width=512,
                     )
 
                     # Get image dimensions from result
