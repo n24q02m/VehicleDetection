@@ -7,57 +7,63 @@ assert amp_allclose(YOLO("yolo11n.pt"), im)
     ```
 assert amp_allclose(YOLO("yolov8m-ghost-p2.yaml"), im)
     ```
-    
-    - Chỉnh sửa dòng 6 file /envs/vehicle-detection/Lib/site-packages/ultralytics/cfg/models/v8/yolov8-ghost-p2.yaml từ:
-    ```
-nc: 80
-    ```
-    thành:
-    ```
-nc: 4
-    ```
 """
 
-import os
-import shutil
 from ultralytics import YOLO
 
+
+def read_augmentation_parameters(file_path):
+    params = {}
+    with open(file_path, "r", encoding="utf-8") as f:
+        for line in f:
+            if line.strip():
+                key_value = line.strip().split(maxsplit=1)
+                if len(key_value) == 2:
+                    key, value = key_value
+                    try:
+                        value = float(value)
+                    except ValueError:
+                        pass
+                    params[key] = value
+    return params
+
+
 if __name__ == "__main__":
-    model_name = "yolov8m-ghost-p2.yaml"
-    model_dir = "./models"
-    model_save_dir = f"{model_dir}/{model_name}"
+    # Paths
+    model_name = "./models/custom-yolov8m-ghost-p2.yaml"
     data_dir = "./data/soict-hackathon-2024_dataset"
     train_project = "./runs"
-    train_name = "train-yolov8m-ghost-p2"
+    train_name = "train-custom-yolov8m-ghost-p2"
 
-    if os.path.exists(model_save_dir):
-        shutil.move(model_save_dir, model_name)
-
-    model = YOLO(model_name)
-
-    model.train(
-        data=f"{data_dir}/data.yaml",
-        fraction=1.0,  # 0.1 là sử dụng 10% dữ liệu
-        cache="disk",  # True nếu cache ram
-        epochs=100,  # 300 cho train from scratch, 100 cho finetune
-        time=10,
-        batch=-1, # -1 là tự động chọn batch size
-        patience=10, # 30 cho train from scratch, 10 cho finetune
-        lr0=1e-3,  # 1e-3 đối với finetune
-        device=0,
-        project=train_project,
-        name=train_name,
-        exist_ok=True,
-        pretrained=False,  # True nếu finetune
-        optimizer="SGD", # AdamW với finetune
-        weight_decay=5e-4,  # 1e-5 đối với finetune
-        warmup_epochs=5,
-        augment=True,
-        multi_scale=True,
-        cos_lr=True,
-        plots=True,
-        show=True,
+    # Read augmentation parameters from the text file
+    augmentation_params = read_augmentation_parameters(
+        "./runs/augmentation-hyperparameter.txt"
     )
 
-    if os.path.exists(model_name):
-        shutil.move(model_name, model_save_dir)
+    # Initialize the model
+    model = YOLO(model_name)
+
+    # Training parameters
+    train_params = {
+        "data": f"{data_dir}/data.yaml",
+        "epochs": 600,
+        "time": 0.5,
+        "batch": -1,
+        "cache": "disk",
+        "device": 0,
+        "project": train_project,
+        "name": train_name,
+        "exist_ok": True,
+        "optimizer": "auto",
+        "seed": 42,
+        "cos_lr": True,
+        "fraction": 0.1,
+        "multi_scale": True,
+        "augment": True,
+        "show": True,
+        "label_smoothing": 0.1,
+        **augmentation_params,
+    }
+
+    # Start training
+    model.train(**train_params)
