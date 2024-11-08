@@ -33,11 +33,11 @@ if __name__ == "__main__":
     model_name = "./models/custom-yolov8m-ghost-p2.yaml"
     data_dir = "./data/soict-hackathon-2024_dataset"
     train_project = "./runs"
-    train_name = "train-custom-yolov8m-ghost-p2"
+    train_name = "train-custom-yolov8m-ghost-p2_1"
 
     # Read augmentation parameters from the text file
     augmentation_params = read_augmentation_parameters(
-        "./runs/augmentation-hyperparameter.txt"
+        "./runs/augmentation_parameters.txt"
     )
 
     # Initialize the model
@@ -47,7 +47,7 @@ if __name__ == "__main__":
     train_params = {
         "data": f"{data_dir}/data.yaml",
         "epochs": 600,
-        "time": 0.5,
+        "time": 0.25,
         "batch": -1,
         "cache": "disk",
         "device": 0,
@@ -57,6 +57,7 @@ if __name__ == "__main__":
         "optimizer": "auto",
         "seed": 42,
         "cos_lr": True,
+        "resume": True,
         "fraction": 0.1,
         "multi_scale": True,
         "augment": True,
