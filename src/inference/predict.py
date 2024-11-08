@@ -47,6 +47,11 @@ def predict_images(model_path, images_dir, output_file):
                         detection_model,
                         slice_height=512,
                         slice_width=512,
+                        overlap_height_ratio=0.2,
+                        overlap_width_ratio=0.2,
+                        postprocess_type="NMS",
+                        postprocess_match_metric="IOU",
+                        postprocess_match_threshold=0.6
                     )
 
                     # Get image dimensions from result
