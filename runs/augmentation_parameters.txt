@@ -1,0 +1,5 @@
+hsv_h 0.459
+hsv_s 0.369
+hsv_v 0.275
+erasing 0.721
+crop_fraction 0.419
