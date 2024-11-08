@@ -78,7 +78,7 @@ def zip_output(output_file):
 def main():
     # Paths
     test_zip = "./data/public test.zip"
-    model_path = "./runs/train-yolov8m-ghost-p2(4)/weights/best.pt"
+    model_path = "./runs/better-train-yolov8m-ghost-p2/weights/best.pt"
     output_file = "./data/predict.txt"
 
     # Extract test images
