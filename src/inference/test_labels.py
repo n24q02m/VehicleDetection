@@ -7,7 +7,7 @@ def create_public_test_labels():
     os.makedirs(output_dir, exist_ok=True)
 
     # Read the predict.txt file
-    predict_file = "./data/predict.txt"
+    predict_file = "./runs/better-train-yolov8m-ghost-p2/test_predict.txt"
     with open(predict_file, "r") as f:
         lines = f.readlines()
 

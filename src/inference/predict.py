@@ -51,7 +51,7 @@ def predict_images(model_path, images_dir, output_file):
                         overlap_width_ratio=0.2,
                         postprocess_type="NMS",
                         postprocess_match_metric="IOU",
-                        postprocess_match_threshold=0.6
+                        postprocess_match_threshold=0.2,
                     )
 
                     # Get image dimensions from result
@@ -84,7 +84,7 @@ def main():
     # Paths
     test_zip = "./data/public test.zip"
     model_path = "./runs/better-train-yolov8m-ghost-p2/weights/best.pt"
-    output_file = "./data/predict.txt"
+    output_file = "./runs/better-train-yolov8m-ghost-p2/test_predict.txt"
 
     # Extract test images
     test_dir = extract_zip(test_zip)
