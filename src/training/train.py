@@ -30,10 +30,10 @@ def read_augmentation_parameters(file_path):
 
 if __name__ == "__main__":
     # Paths
-    model_name = "./models/custom-yolov8m-ghost-p2.yaml"
+    model_name = "./models/custom-yolov8l-ghost-p2.yaml"
     data_dir = "./data/soict-hackathon-2024_dataset"
     train_project = "./runs"
-    train_name = "train-custom-yolov8m-ghost-p2_1"
+    train_name = "train-custom-yolov8l-ghost-p2"
 
     # Read augmentation parameters from the text file
     augmentation_params = read_augmentation_parameters(
@@ -47,8 +47,8 @@ if __name__ == "__main__":
     train_params = {
         "data": f"{data_dir}/data.yaml",
         "epochs": 600,
-        "time": 0.25,
-        "batch": -1,
+        "time": 12,
+        "batch": 0.8,
         "cache": "disk",
         "device": 0,
         "project": train_project,
@@ -58,7 +58,7 @@ if __name__ == "__main__":
         "seed": 42,
         "cos_lr": True,
         "resume": True,
-        "fraction": 0.1,
+        "fraction": 1.0,
         "multi_scale": True,
         "augment": True,
         "show": True,
