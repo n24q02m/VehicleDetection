@@ -30,7 +30,7 @@ def read_augmentation_parameters(file_path):
 
 if __name__ == "__main__":
     # Paths
-    model_name = "./models/custom-yolov8l-ghost-p2.yaml"
+    model_name = "./runs/train-custom-yolov8l-ghost-p2/weights/best.pt"
     data_dir = "./data/soict-hackathon-2024_dataset"
     train_project = "./runs"
     train_name = "train-custom-yolov8l-ghost-p2"
@@ -47,7 +47,7 @@ if __name__ == "__main__":
     train_params = {
         "data": f"{data_dir}/data.yaml",
         "epochs": 600,
-        "time": 12,
+        "time": 6,
         "batch": 0.8,
         "cache": "disk",
         "device": 0,
@@ -57,7 +57,6 @@ if __name__ == "__main__":
         "optimizer": "auto",
         "seed": 42,
         "cos_lr": True,
-        "resume": True,
         "fraction": 1.0,
         "multi_scale": True,
         "augment": True,

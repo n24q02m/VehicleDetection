@@ -1,9 +1,9 @@
 task: detect
 mode: train
-model: ./models/custom-yolov8l-ghost-p2.yaml
+model: ./runs/train-custom-yolov8l-ghost-p2/weights/best.pt
 data: ./data/soict-hackathon-2024_dataset/data.yaml
 epochs: 600
-time: 12
+time: 6
 patience: 100
 batch: 0.8
 imgsz: 640
@@ -24,7 +24,7 @@ single_cls: false
 rect: false
 cos_lr: true
 close_mosaic: 10
-resume: null
+resume: false
 amp: true
 fraction: 1.0
 profile: false
