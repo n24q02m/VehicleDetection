@@ -94,9 +94,9 @@ def zip_output(output_file):
 
 def main():
     # Set up paths based on model directory
-    model_path = "./runs/better-train-yolov8m-ghost-p2/weights/best.pt"
+    model_path = "./runs/train-custom-yolov8l-ghost-p2/weights/best.pt"
     model_dir = str(Path(model_path).parent.parent)  # Get model session directory
-    
+
     test_zip = "./data/public test.zip"
     test_dir = "./data/public test"  # Define expected test directory
     output_file = os.path.join(model_dir, "predict.txt")
