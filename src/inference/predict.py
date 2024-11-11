@@ -56,7 +56,7 @@ def predict_images(model_path, images_dir, output_file, labels_dir):
                         overlap_width_ratio=0.2,
                         postprocess_type="NMS",
                         postprocess_match_metric="IOU",
-                        postprocess_match_threshold=0.2,
+                        postprocess_match_threshold=0.16,
                     )
 
                     # Get image dimensions from result
