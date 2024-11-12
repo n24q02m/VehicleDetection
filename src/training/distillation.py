@@ -8,7 +8,7 @@ class DistillationTrainer(DetectionTrainer):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         # Load teacher model
-        self.teacher_model = YOLO("./runs/finetune_yolov8m/weights/best.pt")
+        self.teacher_model = YOLO("./runs/finetune_yolo11x/weights/best.pt")
         self.teacher_model.model.to(self.device)
         self.teacher_model.model.eval()  # Set teacher model to evaluation mode
         for param in self.teacher_model.model.parameters():

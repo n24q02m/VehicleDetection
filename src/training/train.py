@@ -34,7 +34,7 @@ if __name__ == "__main__":
     model_name = "./models/custom-yolov8m-ghost-p2.yaml"
     data_dir = "./data/soict-hackathon-2024_dataset"
     train_project = "./runs"
-    train_name = "train_custom-yolov8m-ghost-p2_test"
+    train_name = "distillation_custom-yolov8m-ghost-p2"
 
     # Read augmentation parameters from the text file
     augmentation_params = read_augmentation_parameters(
@@ -67,4 +67,4 @@ if __name__ == "__main__":
     }
 
     # Start training with the custom distillation trainer
-    model.train(**train_params)
+    model.train(trainer=DistillationTrainer, **train_params)

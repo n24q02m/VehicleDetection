@@ -4,17 +4,17 @@ from train import read_augmentation_parameters
 
 if __name__ == "__main__":
     # Paths
-    model_name = "./models/yolov8m.pt"
+    model_name = "./models/yolo11x.pt"
     data_dir = "./data/soict-hackathon-2024_dataset"
     train_project = "./runs"
-    train_name = "finetune_yolov8m"
+    train_name = "finetune_yolo11x"
 
     # Read augmentation parameters from the text file
     augmentation_params = read_augmentation_parameters(
         "./runs/augmentation_parameters.txt"
     )
 
-    # Initialize the student model
+    # Initialize the model
     model = YOLO(model_name)
 
     # Training parameters
@@ -39,5 +39,5 @@ if __name__ == "__main__":
         **augmentation_params,
     }
 
-    # Start training with the custom distillation trainer
+    # Start training
     model.train(**train_params)
