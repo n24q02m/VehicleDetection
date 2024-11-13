@@ -168,6 +168,7 @@ cython_debug/
 *.zip
 *.npy
 export/
+*.pt
 
 # IDEs
 .idea/

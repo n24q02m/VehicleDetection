@@ -10,6 +10,7 @@ assert amp_allclose(YOLO("yolov8m-ghost-p2.yaml"), im)
 """
 
 from ultralytics import YOLO
+from distillation import DistillationTrainer
 
 
 def read_augmentation_parameters(file_path):
@@ -30,25 +31,25 @@ def read_augmentation_parameters(file_path):
 
 if __name__ == "__main__":
     # Paths
-    model_name = "./runs/train-custom-yolov8l-ghost-p2/weights/best.pt"
+    model_name = "./models/custom-yolov8m-ghost-p2.yaml"
     data_dir = "./data/soict-hackathon-2024_dataset"
     train_project = "./runs"
-    train_name = "train-custom-yolov8l-ghost-p2"
+    train_name = "distillation_custom-yolov8m-ghost-p2"
 
     # Read augmentation parameters from the text file
     augmentation_params = read_augmentation_parameters(
         "./runs/augmentation_parameters.txt"
     )
 
-    # Initialize the model
+    # Initialize the student model
     model = YOLO(model_name)
 
     # Training parameters
     train_params = {
         "data": f"{data_dir}/data.yaml",
         "epochs": 600,
-        "time": 6,
-        "batch": 0.8,
+        "time": 0.5,
+        "batch": -1,
         "cache": "disk",
         "device": 0,
         "project": train_project,
@@ -57,7 +58,7 @@ if __name__ == "__main__":
         "optimizer": "auto",
         "seed": 42,
         "cos_lr": True,
-        "fraction": 1.0,
+        "fraction": 0.1,
         "multi_scale": True,
         "augment": True,
         "show": True,
@@ -65,5 +66,5 @@ if __name__ == "__main__":
         **augmentation_params,
     }
 
-    # Start training
-    model.train(**train_params)
+    # Start training with the custom distillation trainer
+    model.train(trainer=DistillationTrainer, **train_params)

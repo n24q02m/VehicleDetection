@@ -103,7 +103,7 @@ def main():
     
     model_path = f"./runs/{model_name}/weights/best.pt"
     model_dir = str(Path(model_path).parent.parent)  # Get model session directory
-    
+
     test_zip = "./data/public test.zip"
     test_dir = "./data/public test"  # Define expected test directory
     output_file = os.path.join(model_dir, "predict.txt")
