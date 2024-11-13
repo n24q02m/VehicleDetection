@@ -14,13 +14,8 @@ if __name__ == "__main__":
 
     # Danh sách cấu hình mô hình
     model_configs = [
-        # {"name": "yolov8-fpf.yaml", "train_name": "train_yolov8-fpf"},
-        # {"name": "yolov8-cd.yaml", "train_name": "train_yolov8-cd"},
-        # {"name": "yolov8-sc.yaml", "train_name": "train_yolov8-sc"},
-        # {"name": "yolov8-aff.yaml", "train_name": "train_yolov8-aff"},
-        # {"name": "custom-yolov8.yaml", "train_name": "train_custom-yolov8"},
-        {"name": "yolov8-adsc.yaml", "train_name": "train_yolov8-adsc"},
-        {"name": "yolov8-ghost.yaml", "train_name": "train_yolov8-ghost"},
+        {"name": "yolov8l-adsc.yaml", "train_name": "train_yolov8-adsc"},
+        {"name": "yolov8l-ghost.yaml", "train_name": "train_yolov8-ghost"},
     ]
 
     # Tham số huấn luyện
@@ -65,6 +60,6 @@ if __name__ == "__main__":
             print(f"Hoàn thành huấn luyện cho mô hình {config['name']}.")
         except Exception as e:
             print(f"Đã xảy ra lỗi khi huấn luyện mô hình {config['name']}: {e}")
-            traceback.print_exc()  # Print the full traceback of the error
+            traceback.print_exc()
             print("Bỏ qua và chuyển sang mô hình tiếp theo...\n")
             continue

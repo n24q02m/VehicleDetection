@@ -1,6 +1,6 @@
 task: detect
 mode: train
-model: ./models\yolov8-ghost.yaml
+model: ./models\yolov8l-ghost.yaml
 data: ./data/soict-hackathon-2024_dataset/data.yaml
 epochs: 5
 time: null
