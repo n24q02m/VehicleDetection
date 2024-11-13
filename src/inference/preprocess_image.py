@@ -1,78 +1,83 @@
 import cv2
 import numpy as np
 
-def adjust_brightness_contrast(image, alpha=1.4, beta=10):
+def measure_brightness(image):
     """
-    Điều chỉnh độ sáng và độ tương phản của ảnh.
-    alpha: Hệ số tăng cường độ sáng (1.0-3.0)
-    beta: Giá trị cộng thêm vào mỗi pixel (0-100)
+    Đo lường độ sáng của ảnh bằng cách tính độ sáng trung bình.
     """
-    return cv2.convertScaleAbs(image, alpha=alpha, beta=beta)
+    hsv = cv2.cvtColor(image, cv2.COLOR_BGR2HSV)
+    brightness = np.mean(hsv[:, :, 2])
+    return brightness
 
-def reduce_noise(image, h=15, hForColorComponents=15, templateWindowSize=7, searchWindowSize=21):
+def measure_contrast(image):
     """
-    Giảm nhiễu trong ảnh.
-    h: Tham số lọc. Giá trị càng cao thì mức độ giảm nhiễu càng cao.
-    hForColorComponents: Tham số lọc cho các thành phần màu. Giá trị càng cao thì mức độ giảm nhiễu càng cao.
-    templateWindowSize: Kích thước cửa sổ mẫu. Giá trị càng lớn thì mức độ giảm nhiễu càng cao.
-    searchWindowSize: Kích thước cửa sổ tìm kiếm. Giá trị càng lớn thì mức độ giảm nhiễu càng cao.
+    Đo lường độ tương phản của ảnh bằng cách tính độ lệch chuẩn của độ sáng.
     """
-    return cv2.fastNlMeansDenoisingColored(image, None, h, hForColorComponents, templateWindowSize, searchWindowSize)
+    gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+    contrast = np.std(gray)
+    return contrast
 
-def sharpen_image(image):
+def adaptive_brightness_contrast(image, target_brightness=130, target_contrast=50):
     """
-    Làm sắc nét ảnh.
+    Điều chỉnh độ sáng và độ tương phản dựa trên điều kiện ánh sáng.
+    target_brightness: Độ sáng mong muốn của ảnh.
+    target_contrast: Độ tương phản mong muốn của ảnh.
     """
-    kernel = np.array([[0, -0.5, 0], [-0.5, 3, -0.5], [0, -0.5, 0]])
-    return cv2.filter2D(image, -1, kernel)
+    current_brightness = measure_brightness(image)
+    current_contrast = measure_contrast(image)
 
-def apply_clahe(image, clip_limit=2.5, tile_grid_size=(16, 16)):
+    # Điều chỉnh độ sáng (alpha) và độ tương phản (beta) dựa trên sự khác biệt
+    brightness_adjustment = target_brightness / max(current_brightness, 1)
+    contrast_adjustment = target_contrast / max(current_contrast, 1)
+
+    # Áp dụng điều chỉnh
+    adjusted = cv2.convertScaleAbs(image, alpha=brightness_adjustment, beta=contrast_adjustment)
+    return adjusted
+
+def adaptive_gamma_correction(image, target_brightness=130):
     """
-    Tăng cường độ tương phản của ảnh bằng CLAHE.
-    clip_limit: Giá trị cắt ngưỡng của histogram.
-    tile_grid_size: Kích thước của lưới mà CLAHE sẽ áp dụng.
+    Điều chỉnh gamma để kiểm soát độ sáng của ảnh.
+    target_brightness: Độ sáng mong muốn của ảnh.
     """
-    lab = cv2.cvtColor(image, cv2.COLOR_RGB2LAB)
+    current_brightness = measure_brightness(image)
+    gamma = np.log(target_brightness / max(current_brightness, 1)) / np.log(2) if current_brightness > 0 else 1.0
+    gamma = max(0.5, min(gamma, 2.5))  # Giới hạn gamma trong khoảng hợp lý
+
+    inv_gamma = 1.0 / gamma
+    table = np.array([((i / 255.0) ** inv_gamma) * 255 for i in np.arange(256)]).astype("uint8")
+    return cv2.LUT(image, table)
+
+def adaptive_clahe(image, clip_limit=2.0, tile_grid_size=(8, 8)):
+    """
+    Tăng cường độ tương phản bằng CLAHE nếu ảnh có độ sáng thấp.
+    """
+    lab = cv2.cvtColor(image, cv2.COLOR_BGR2LAB)
     l, a, b = cv2.split(lab)
     clahe = cv2.createCLAHE(clipLimit=clip_limit, tileGridSize=tile_grid_size)
     cl = clahe.apply(l)
     limg = cv2.merge((cl, a, b))
-    return cv2.cvtColor(limg, cv2.COLOR_LAB2RGB)
+    return cv2.cvtColor(limg, cv2.COLOR_LAB2BGR)
 
-def gamma_correction(image, gamma=1.0):
+def reduce_noise(image, h=15, hForColorComponents=15, templateWindowSize=7, searchWindowSize=21):
     """
-    Điều chỉnh gamma của ảnh.
-    gamma: Giá trị gamma (0.1-3.0)
+    Giảm nhiễu trong ảnh.
     """
-    inv_gamma = 1.0 / gamma
-    table = np.array([((i / 255.0) ** inv_gamma) * 255 for i in np.arange(0, 256)]).astype("uint8")
-    return cv2.LUT(image, table)
-
-def mask_bright_spots(image, threshold=240):
-    """
-    Tạo mặt nạ để giảm độ sáng của các vùng quá chói.
-    threshold: Ngưỡng để xác định các vùng sáng.
-    """
-    gray = cv2.cvtColor(image, cv2.COLOR_RGB2GRAY)
-    _, mask = cv2.threshold(gray, threshold, 255, cv2.THRESH_BINARY)
-    mask_inv = cv2.bitwise_not(mask)
-    image_masked = cv2.bitwise_and(image, image, mask=mask_inv)
-    return image_masked
+    return cv2.fastNlMeansDenoisingColored(image, None, h, hForColorComponents, templateWindowSize, searchWindowSize)
 
 def preprocess_image(image):
-    # Tạo mặt nạ để giảm độ sáng của các vùng quá chói
-    image = mask_bright_spots(image)
-    
-    # Tăng cường độ tương phản bằng CLAHE
-    image = apply_clahe(image)
-    
+    """
+    Thực hiện Real-time Adaptation trên ảnh đầu vào.
+    """
+    # Điều chỉnh độ sáng và độ tương phản
+    image = adaptive_brightness_contrast(image)
+
     # Điều chỉnh gamma
-    image = gamma_correction(image, gamma=1.5)
-    
+    image = adaptive_gamma_correction(image)
+
+    # Tăng cường độ tương phản với CLAHE
+    image = adaptive_clahe(image)
+
     # Giảm nhiễu
     image = reduce_noise(image)
-    
-    # Làm sắc nét
-    image = sharpen_image(image)
-    
+
     return image
