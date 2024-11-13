@@ -1,5 +1,5 @@
 """
-    - Chỉnh sửa dòng 696 file /envs/vehicle-detection/Lib/site-packages/ultralytics/utils/check.py từ:
+    - Chỉnh sửa dòng 692 file ultralytics/ultralytics/utils/check.py từ:
     ```
 assert amp_allclose(YOLO("yolo11n.pt"), im)
     ```

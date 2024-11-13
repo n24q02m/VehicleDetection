@@ -1,11 +1,11 @@
 task: detect
 mode: train
-model: ./models/yolo11x.pt
+model: ./models\yolov8-adsc.yaml
 data: ./data/soict-hackathon-2024_dataset/data.yaml
-epochs: 600
-time: 10
+epochs: 5
+time: null
 patience: 100
-batch: 0.8
+batch: -1
 imgsz: 640
 save: true
 save_period: -1
@@ -13,7 +13,7 @@ cache: disk
 device: 0
 workers: 8
 project: ./runs
-name: finetune_yolo11x
+name: train_yolov8-adsc
 exist_ok: true
 pretrained: true
 optimizer: auto
@@ -26,7 +26,7 @@ cos_lr: true
 close_mosaic: 10
 resume: false
 amp: true
-fraction: 1.0
+fraction: 0.1
 profile: false
 freeze: null
 multi_scale: true
@@ -104,4 +104,4 @@ erasing: 0.721
 crop_fraction: 0.419
 cfg: null
 tracker: botsort.yaml
-save_dir: runs\finetune_yolo11x
+save_dir: runs\train_yolov8-adsc
