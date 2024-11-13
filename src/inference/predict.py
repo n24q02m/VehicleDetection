@@ -1,11 +1,13 @@
 import os
+import cv2
 import zipfile
 from tqdm import tqdm
-from sahi import AutoDetectionModel
-from sahi.predict import get_sliced_prediction
+from ultralytics import YOLO
 import torch
 from pathlib import Path
+from preprocess_image import preprocess_image
 
+model_name = "better-train-yolov8m-ghost-p2"
 
 def extract_zip(zip_path):
     extract_dir = os.path.splitext(zip_path)[0]
@@ -20,16 +22,16 @@ def extract_zip(zip_path):
 
 
 def predict_images(model_path, images_dir, output_file, labels_dir):
+    # Load the model
+    model = YOLO(model_path)
+    
+    predict_project = "./runs"
+    predict_name = f"predict_{model_name}"
+    
     # Load the model with quantization
-    detection_model = AutoDetectionModel.from_pretrained(
-        model_type="yolov8",
-        model_path=model_path,
-        confidence_threshold=0.25,
-        device="cuda:0",
-    )
-    detection_model.model.fuse()
-    detection_model.model.model = torch.quantization.quantize_dynamic(
-        detection_model.model.model,
+    model.model.fuse()
+    model.model.model = torch.quantization.quantize_dynamic(
+        model.model.model,
         {torch.nn.Linear},
         dtype=torch.qint8,
     )
@@ -45,23 +47,29 @@ def predict_images(model_path, images_dir, output_file, labels_dir):
             for file in tqdm(files, desc="Predicting"):
                 if file.lower().endswith((".jpg", ".jpeg", ".png")):
                     image_path = os.path.join(root, file)
+                    image = cv2.imread(image_path)
+                    if image is None:
+                        print(f"Không thể đọc file ảnh: {image_path}")
+                        continue
 
-                    # Perform sliced prediction using SAHI
-                    result = get_sliced_prediction(
-                        image_path,
-                        detection_model,
-                        slice_height=512,
-                        slice_width=512,
-                        overlap_height_ratio=0.2,
-                        overlap_width_ratio=0.2,
-                        postprocess_type="NMS",
-                        postprocess_match_metric="IOU",
-                        postprocess_match_threshold=0.2,
+                    image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)  # Chuyển đổi từ BGR sang RGB
+                    processed_image = preprocess_image(image)
+                    processed_image = cv2.cvtColor(processed_image, cv2.COLOR_RGB2BGR)  # Chuyển đổi từ RGB sang BGR
+
+                    # Perform prediction using YOLO
+                    results = model.predict(
+                        source=processed_image,
+                        conf=0.25,
+                        iou=0.7,
+                        device=0,
+                        agnostic_nms=True,
+                        retina_masks=True,
+                        project=predict_project,
+                        name=predict_name,
                     )
 
-                    # Get image dimensions from result
-                    image_width = result.image_width
-                    image_height = result.image_height
+                    # Get image dimensions
+                    image_width, image_height = results[0].orig_shape[1], results[0].orig_shape[0]
 
                     # Create label file for current image
                     base_name = os.path.splitext(file)[0]
@@ -69,21 +77,20 @@ def predict_images(model_path, images_dir, output_file, labels_dir):
 
                     # Write results to both predict.txt and individual label files
                     with open(txt_filepath, "w") as txt_file:
-                        for object_prediction in result.object_prediction_list:
-                            x1, y1, x2, y2 = object_prediction.bbox.to_xyxy()
+                        for result in results[0].boxes:
+                            x1, y1, x2, y2 = result.xyxy[0]
+                            conf = result.conf[0]
+                            cls = result.cls[0]
                             x_center = ((x1 + x2) / 2) / image_width
                             y_center = ((y1 + y2) / 2) / image_height
                             width = (x2 - x1) / image_width
                             height = (y2 - y1) / image_height
-                            conf = object_prediction.score.value
-                            cls = object_prediction.category.id
 
                             # Write to predict.txt
-                            f.write(f"{file} {cls} {x_center} {y_center} {width} {height} {conf:.3f}\n")
+                            f.write(f"{file} {int(cls)} {x_center:.6f} {y_center:.6f} {width:.6f} {height:.6f} {conf:.3f}\n")
                             
                             # Write to individual label file
-                            txt_file.write(f"{cls} {x_center} {y_center} {width} {height}\n")
-
+                            txt_file.write(f"{int(cls)} {x_center:.6f} {y_center:.6f} {width:.6f} {height:.6f}\n")
 
 def zip_output(output_file):
     print("Đang nén file kết quả...")
@@ -91,10 +98,10 @@ def zip_output(output_file):
         zipf.write(output_file, os.path.basename(output_file))
     print(f"Đã nén thành công: {output_file}.zip")
 
-
 def main():
     # Set up paths based on model directory
-    model_path = "./runs/better-train-yolov8m-ghost-p2/weights/best.pt"
+    
+    model_path = f"./runs/{model_name}/weights/best.pt"
     model_dir = str(Path(model_path).parent.parent)  # Get model session directory
     
     test_zip = "./data/public test.zip"
@@ -117,7 +124,6 @@ def main():
     zip_output(output_file)
 
     print("Hoàn thành!")
-
 
 if __name__ == "__main__":
     main()
