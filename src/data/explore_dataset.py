@@ -5,7 +5,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib.patches import Rectangle
 from tqdm import tqdm
-
+from scipy.ndimage import gaussian_filter
 
 def get_image_paths(data_folder):
     image_paths = []
@@ -120,37 +120,77 @@ def analyze_box_dimensions(label_paths, output_dir):
     print("Đã lưu biểu đồ phân bố kích thước bounding boxes.")
 
 
-def analyze_box_heatmap(image_paths, labels_folder, output_dir):
-    heatmap = None
-    for image_path in tqdm(image_paths, desc="Creating heatmap"):
-        image = cv2.imread(image_path)
-        h, w = image.shape[:2]
-        label_path = os.path.join(
-            labels_folder, os.path.splitext(os.path.basename(image_path))[0] + ".txt"
-        )
-        if os.path.exists(label_path):
-            mask = np.zeros((h, w))
-            with open(label_path, "r") as f:
-                for line in f:
-                    _, x_center, y_center, width, height = map(
+def analyze_bbox_heatmap(label_paths, output_dir):
+    """
+    Tạo biểu đồ nhiệt phân bố bounding boxes.
+
+    Args:
+        label_paths (List[str]): Danh sách đường dẫn đến các file nhãn.
+        output_dir (str): Thư mục để lưu biểu đồ nhiệt.
+    """
+    # Kích thước heatmap nhỏ hơn để tối ưu hiệu suất
+    heatmap_width, heatmap_height = 128, 72
+    heatmap_data = np.zeros((heatmap_height, heatmap_width))
+
+    # Tích lũy dữ liệu cho heatmap
+    for label_path in tqdm(label_paths, desc="Generating bbox heatmap"):
+        with open(label_path, "r") as file:
+            for line in file:
+                try:
+                    # Đọc tọa độ bbox từ định dạng YOLO (class, x_center, y_center, width, height)
+                    _, x_center_norm, y_center_norm, width_norm, height_norm = map(
                         float, line.strip().split()
                     )
-                    x1 = int((x_center - width / 2) * w)
-                    y1 = int((y_center - height / 2) * h)
-                    x2 = int((x_center + width / 2) * w)
-                    y2 = int((y_center + height / 2) * h)
-                    mask[y1:y2, x1:x2] += 1
-            if heatmap is None:
-                heatmap = mask
-            else:
-                heatmap += mask
-    plt.figure()
-    plt.imshow(heatmap, cmap="hot", interpolation="nearest")
-    plt.title("Heatmap of Bounding Boxes")
-    plt.colorbar()
-    plt.savefig(os.path.join(output_dir, "box_heatmap.png"))
+
+                    # Chuyển đổi tọa độ normalized thành pixel trên heatmap
+                    x_center = int(x_center_norm * heatmap_width)
+                    y_center = int(y_center_norm * heatmap_height)
+                    width = int(width_norm * heatmap_width)
+                    height = int(height_norm * heatmap_height)
+
+                    # Tính tọa độ bbox
+                    x1 = max(0, x_center - width // 2)
+                    x2 = min(heatmap_width, x_center + width // 2)
+                    y1 = max(0, y_center - height // 2)
+                    y2 = min(heatmap_height, y_center + height // 2)
+
+                    # Tăng giá trị trong vùng bbox
+                    heatmap_data[y1:y2, x1:x2] += 1
+                except ValueError:
+                    continue
+
+    # Làm mịn heatmap bằng Gaussian filter
+    heatmap_smoothed = gaussian_filter(heatmap_data, sigma=2)
+
+    # Chuẩn hóa heatmap về khoảng [0,1]
+    if np.max(heatmap_smoothed) > 0:
+        heatmap_normalized = heatmap_smoothed / np.max(heatmap_smoothed)
+    else:
+        heatmap_normalized = heatmap_smoothed
+
+    # Vẽ và lưu biểu đồ nhiệt
+    plt.figure(figsize=(12, 8))
+    plt.imshow(heatmap_normalized, cmap="jet")
+    plt.colorbar(label="Normalized Density")
+    plt.title("Bounding Box Distribution Heatmap")
+    plt.xlabel("Image Width")
+    plt.ylabel("Image Height")
+    plt.savefig(
+        os.path.join(output_dir, "bbox_heatmap.png"), dpi=300, bbox_inches="tight"
+    )
     plt.close()
-    print("Đã lưu biểu đồ heatmap của bounding boxes.")
+
+    print(
+        f"Đã lưu biểu đồ nhiệt phân bố bounding box vào {output_dir}/bbox_heatmap.png"
+    )
+
+    # Tính và in một số thống kê
+    print("\nThống kê phân bố bbox:")
+    print(f"Tổng số bbox: {int(np.sum(heatmap_data))}")
+    print(f"Độ tập trung trung bình: {np.mean(heatmap_normalized):.3f}")
+    print(f"Độ tập trung cao nhất: {np.max(heatmap_normalized):.3f}")
+
+    return heatmap_normalized
 
 
 def analyze_image_colors(image_paths, output_dir):
@@ -207,9 +247,9 @@ def main():
     # Gọi hàm explore_images_combined
     explore_images_combined(image_paths_dict, output_dir)
 
-    explore_labels(total_labels, "Tổng số nhãn", output_dir)
-    explore_labels(daytime_labels, "Nhãn ban ngày", output_dir)
-    explore_labels(nighttime_labels, "Nhãn ban đêm", output_dir)
+    explore_labels(total_labels, "total labels", output_dir)
+    explore_labels(daytime_labels, "daytime labels", output_dir)
+    explore_labels(nighttime_labels, "nighttime labels", output_dir)
 
     save_random_images_with_boxes(
         daytime_images, daytime_folder, os.path.join(output_dir, "daytime_samples")
@@ -221,7 +261,7 @@ def main():
     )
 
     analyze_box_dimensions(total_labels, output_dir)
-    analyze_box_heatmap(total_images, extracted_folder, output_dir)
+    analyze_bbox_heatmap(total_labels, output_dir)
     analyze_image_colors(total_images, output_dir)
 
 if __name__ == "__main__":
