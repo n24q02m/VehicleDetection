@@ -63,7 +63,7 @@ if __name__ == "__main__":
     else:
         # Tải tệp zip từ Google Drive
         print("Không tìm thấy tệp dataset zip. Đang tải từ Google Drive...")
-        google_drive_url = "https://drive.google.com/uc?id=YOUR_FILE_ID&export=download"
+        google_drive_url = "https://drive.google.com/uc?id=19fm1TDHeRypdpqNdj0EyXAppPeGBV5Wh&export=download"
         zip_path = os.path.join(data_dir, dataset_zip)
         download_success = download_file(google_drive_url, zip_path)
         if download_success and os.path.exists(zip_path):
