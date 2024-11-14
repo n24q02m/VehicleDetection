@@ -38,7 +38,7 @@ if __name__ == "__main__":
 
     # Read augmentation parameters from the text file
     augmentation_params = read_augmentation_parameters(
-        "./runs/augmentation_parameters.txt"
+        "./runs/just_mosaic.txt"
     )
 
     # Initialize the student model
@@ -61,7 +61,6 @@ if __name__ == "__main__":
         "fraction": 0.1,
         "multi_scale": True,
         "augment": True,
-        "show": True,
         "label_smoothing": 0.1,
         **augmentation_params,
     }

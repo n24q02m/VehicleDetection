@@ -10,9 +10,7 @@ if __name__ == "__main__":
     train_name = "finetune_yolo11x"
 
     # Read augmentation parameters from the text file
-    augmentation_params = read_augmentation_parameters(
-        "./runs/augmentation_parameters.txt"
-    )
+    augmentation_params = read_augmentation_parameters("./runs/just_mosaic.txt")
 
     # Initialize the model
     model = YOLO(model_name)
