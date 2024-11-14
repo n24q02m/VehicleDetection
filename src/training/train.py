@@ -37,9 +37,7 @@ if __name__ == "__main__":
     train_name = "distillation_custom-yolov8m-ghost-p2"
 
     # Read augmentation parameters from the text file
-    augmentation_params = read_augmentation_parameters(
-        "./runs/just_mosaic.txt"
-    )
+    augmentation_params = read_augmentation_parameters("./runs/mosaic_erasing.txt")
 
     # Initialize the student model
     model = YOLO(model_name)
