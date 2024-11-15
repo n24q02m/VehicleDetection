@@ -1,17 +1,15 @@
 import os
-import requests
+import gdown
 import zipfile
 import shutil
 
 def download_file(url, destination):
     if not os.path.exists(destination):
-        print(f"Đang tải tệp từ {url}...")
-        response = requests.get(url, stream=True)
-        with open(destination, 'wb') as f:
-            shutil.copyfileobj(response.raw, f)
-        print(f"Đã tải tệp về {destination}")
+        print(f"Downloading file from {url}...")
+        gdown.download(url, destination, quiet=False)
+        print(f"Downloaded file to {destination}")
     else:
-        print(f"Tệp {destination} đã tồn tại.")
+        print(f"File {destination} already exists.")
 
 def create_folders():
     base_dir = "./data/soict-hackathon-2024_dataset"
@@ -50,7 +48,7 @@ def extract_zip(zip_path, extract_to):
 
 def main():
     os.makedirs("./data", exist_ok=True)
-    zip_url = "https://drive.google.com/uc?id=19ceZ6wTnXnNGc3WtVTWabUjLVIpnY-WY&export=download"
+    zip_url = "https://drive.google.com/uc?id=1MDSqUfS7mvx4qZftbSCfPUhPNAJuKLlE"
     zip_path = "./data/train_20241023.zip"
     extract_dir = "./data/extracted_data"
     os.makedirs(extract_dir, exist_ok=True)
