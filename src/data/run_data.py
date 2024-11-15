@@ -50,44 +50,42 @@ if __name__ == "__main__":
     # Tạo thư mục data nếu chưa tồn tại
     os.makedirs(data_dir, exist_ok=True)
 
-    # Kiểm tra nếu tệp zip đã tồn tại
-    zip_paths = [os.path.join(".", dataset_zip), os.path.join(data_dir, dataset_zip)]
-    zip_exists = any(os.path.exists(path) for path in zip_paths)
-
-    if zip_exists:
-        # Sử dụng tệp zip hiện có
-        zip_path = next(path for path in zip_paths if os.path.exists(path))
-        print(f"Tìm thấy tệp {zip_path}.")
-        extract_zip(zip_path, data_dir)
-        print("Dataset đã sẵn sàng.")
+    # Kiểm tra nếu thư mục dataset đã tồn tại
+    if os.path.exists(dataset_dir):
+        print("Thư mục dataset đã tồn tại. Bỏ qua các bước xử lý và tăng cường dữ liệu.")
     else:
-        # Tải tệp zip từ Google Drive
-        print("Không tìm thấy tệp dataset zip. Đang tải từ Google Drive...")
-        google_drive_url = "https://drive.google.com/uc?id=19fm1TDHeRypdpqNdj0EyXAppPeGBV5Wh&export=download"
-        zip_path = os.path.join(data_dir, dataset_zip)
-        download_success = download_file(google_drive_url, zip_path)
-        if download_success and os.path.exists(zip_path):
+        # Kiểm tra nếu tệp zip đã tồn tại
+        zip_paths = [os.path.join(".", dataset_zip), os.path.join(data_dir, dataset_zip)]
+        zip_exists = any(os.path.exists(path) for path in zip_paths)
+
+        if zip_exists:
+            # Sử dụng tệp zip hiện có
+            zip_path = next(path for path in zip_paths if os.path.exists(path))
+            print(f"Tìm thấy tệp {zip_path}.")
             extract_zip(zip_path, data_dir)
             print("Dataset đã sẵn sàng.")
         else:
-            print("Không thể tải tệp zip từ Google Drive.")
-            print("Tiếp tục chạy các script xử lý dữ liệu...")
-
-    # Kiểm tra nếu thư mục dataset đã tồn tại
-    if os.path.exists(dataset_dir):
-        print(
-            "Thư mục dataset đã tồn tại. Bỏ qua các bước xử lý và tăng cường dữ liệu."
-        )
-    else:
-        # Chạy các script xử lý dữ liệu
-        print("Bắt đầu quá trình xử lý và tăng cường dữ liệu...")
-        download_dataset_main()
-        explore_dataset_main()
-        preprocess_data_main()
-        augment_data_main()
-        print("Hoàn thành quá trình xử lý và tăng cường dữ liệu.")
-
-    # Nén dataset sau khi hoàn thành
-    if not zip_exists:
-        zip_dataset(dataset_dir, os.path.join(data_dir, dataset_zip))
-        print("Dataset đã được nén lại.")
+            # Tải tệp zip từ Google Drive
+            print("Không tìm thấy tệp dataset zip. Đang tải từ Google Drive...")
+            google_drive_url = "https://drive.google.com/uc?id=19fm1TDHeRypdpqNdj0EyXAppPeGBV5Wh&export=download"
+            zip_path = os.path.join(data_dir, dataset_zip)
+            download_success = download_file(google_drive_url, zip_path)
+            
+            if download_success and os.path.exists(zip_path):
+                extract_zip(zip_path, data_dir)
+                print("Dataset đã sẵn sàng.")
+            else:
+                print("Không thể tải tệp zip từ Google Drive.")
+                print("Tiếp tục chạy các script xử lý dữ liệu...")
+                
+                # Chạy các script xử lý dữ liệu
+                print("Bắt đầu quá trình xử lý và tăng cường dữ liệu...")
+                download_dataset_main()
+                explore_dataset_main()
+                preprocess_data_main()
+                augment_data_main()
+                print("Hoàn thành quá trình xử lý và tăng cường dữ liệu.")
+                
+                # Nén dataset sau khi hoàn thành xử lý
+                zip_dataset(dataset_dir, os.path.join(data_dir, dataset_zip))
+                print("Dataset đã được nén lại.")
