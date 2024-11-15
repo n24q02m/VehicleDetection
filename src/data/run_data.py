@@ -52,7 +52,6 @@ def zip_dataset(folder_path, output_path):
     # Ensure the output path does not have the .zip extension for make_archive
     base_name = os.path.splitext(output_path)[0]
     shutil.make_archive(base_name=base_name, format='zip', root_dir=folder_path)
-    print("Dataset compressed.")
 
 
 if __name__ == "__main__":
@@ -65,56 +64,33 @@ if __name__ == "__main__":
 
     # Check if dataset directory already exists
     if os.path.exists(dataset_dir):
-        print("Thư mục dataset đã tồn tại. Bỏ qua các bước xử lý và tăng cường dữ liệu.")
+        print("Dataset directory already exists. Skipping download and extraction.")
     else:
-        # Check if zip file exists 
-        zip_paths = [os.path.join(".", dataset_zip), os.path.join(data_dir, dataset_zip)]
-        zip_exists = any(os.path.exists(path) and os.path.getsize(path) > 0 for path in zip_paths)
-
-        if zip_exists:
-            # Use existing zip file after validating
-            zip_path = next(path for path in zip_paths if os.path.exists(path))
-            print(f"Tìm thấy tệp {zip_path}.")
-            
-            # Validate zip file
-            try:
-                with ZipFile(zip_path, 'r') as zf:
-                    # Test zip file validity
-                    bad_file = zf.testzip()
-                    if bad_file:
-                        raise zipfile.BadZipFile(f"Bad file found: {bad_file}")
-                    
-                # If valid, extract it
-                extract_zip(zip_path, data_dir)
-                print("Dataset đã sẵn sàng.")
-                
-            except zipfile.BadZipFile:
-                print(f"Tệp {zip_path} không phải là file zip hợp lệ hoặc bị hỏng.")
-                print("Tiếp tục chạy các script xử lý dữ liệu...")
-                # Run data processing scripts
-                print("Bắt đầu quá trình xử lý và tăng cường dữ liệu...")
-                download_dataset_main()
-                explore_dataset_main() 
-                preprocess_data_main()
-                augment_data_main()
-                print("Hoàn thành quá trình xử lý và tăng cường dữ liệu.")
-                
-                # Compress dataset after processing
-                zip_dataset(dataset_dir, os.path.join(data_dir, dataset_zip))
-                print("Dataset đã được nén lại.")
+        if os.path.exists(os.path.join(data_dir, dataset_zip)):
+            print(f"Found {dataset_zip}. Extracting...")
+            extract_zip(os.path.join(data_dir, dataset_zip), data_dir)
         else:
-            # If Google Drive URL is empty, skip downloading and proceed with processing
-            print("Bỏ qua bước tải dataset từ Google Drive.")
-            print("Tiếp tục chạy các script xử lý dữ liệu...")
-            
-            # Run data processing scripts
-            print("Bắt đầu quá trình xử lý và tăng cường dữ liệu...")
-            download_dataset_main()
-            explore_dataset_main()
-            preprocess_data_main()
-            augment_data_main()
-            print("Hoàn thành quá trình xử lý và tăng cường dữ liệu.")
+            zip_url = "https://drive.google.com/uc?id=1MDSqUfS7mvx4qZftbSCfPUhPNAJuKLlE"
+            success = download_file(zip_url, os.path.join(data_dir, dataset_zip))
+            if success:
+                extract_zip(os.path.join(data_dir, dataset_zip), data_dir)
+            else:
+                print("Download failed. Running data processing scripts...")
+                download_dataset_main()
+                preprocess_data_main()
+                explore_dataset_main()
+                augment_data_main()
 
-            # Compress dataset after processing
-            zip_dataset(dataset_dir, os.path.join(data_dir, dataset_zip))
-            print("Dataset đã được nén lại.")
+        # Verify extraction
+        if not os.path.exists(dataset_dir):
+            print("Extraction failed or dataset directory missing. Running data processing scripts...")
+            download_dataset_main()
+            preprocess_data_main()
+            explore_dataset_main()
+            augment_data_main()
+        else:
+            print("Dataset ready.")
+
+    # Compress dataset after processing
+    zip_dataset(dataset_dir, os.path.join(data_dir, dataset_zip))
+    print("Dataset compressed.")

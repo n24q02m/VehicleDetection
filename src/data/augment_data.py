@@ -38,6 +38,7 @@ def get_augmentation_pipeline():
             format="pascal_voc",
             label_fields=["class_labels"],
             min_visibility=0.4,
+            clip=True,
         ),
     )
 
