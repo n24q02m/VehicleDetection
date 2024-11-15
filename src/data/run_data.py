@@ -77,16 +77,16 @@ if __name__ == "__main__":
             else:
                 print("Download failed. Running data processing scripts...")
                 download_dataset_main()
-                preprocess_data_main()
                 explore_dataset_main()
+                preprocess_data_main()
                 augment_data_main()
 
         # Verify extraction
         if not os.path.exists(dataset_dir):
             print("Extraction failed or dataset directory missing. Running data processing scripts...")
             download_dataset_main()
-            preprocess_data_main()
             explore_dataset_main()
+            preprocess_data_main()
             augment_data_main()
         else:
             print("Dataset ready.")
