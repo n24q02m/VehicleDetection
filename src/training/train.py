@@ -84,7 +84,7 @@ if __name__ == "__main__":
     model_name = "./models/yolov8-adsc.yaml"
     data_dir = "./data/soict-hackathon-2024_dataset"
     train_project = "./runs"
-    train_name = "distillation_yolov8-adsc"
+    train_name = "final-model"
 
     # Read augmentation parameters from the text file
     augmentation_params = read_augmentation_parameters("./runs/mosaic_erasing.txt")

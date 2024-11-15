@@ -10,7 +10,7 @@ if __name__ == "__main__":
     model_name = "./models/yolo11x.pt"
     data_dir = "./data/soict-hackathon-2024_dataset"
     train_project = "./runs"
-    train_name = "finetune_yolo11x"
+    train_name = "finetuned-model"
 
     # Read augmentation parameters from the text file
     augmentation_params = read_augmentation_parameters("./runs/mosaic_erasing.txt")

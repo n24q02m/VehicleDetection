@@ -172,6 +172,7 @@ data/
 !src/data/
 *.pt
 runs/**/labels/
+runs/**/weights/
 
 # IDEs
 .idea/
