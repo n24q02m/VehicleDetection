@@ -171,6 +171,7 @@ export/
 data/
 !src/data/
 *.pt
+runs/**/labels/
 
 # IDEs
 .idea/
