@@ -177,7 +177,7 @@ def main():
     process_labels(train_labels_folder)
     create_background_images(train_images_folder, train_labels_folder)
     multiply_images(train_images_folder, train_labels_folder, multiplication_factor=2)
-    split_train_val(train_images_folder, train_labels_folder, val_ratio=0.2)
+    split_train_val(train_images_folder, train_labels_folder, val_ratio=0.1)
 
 if __name__ == "__main__":
     main()

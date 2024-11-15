@@ -42,13 +42,13 @@ def get_augmentation_pipeline():
     )
 
 
-def augment_dataset(images_folder, labels_folder, augmentations_per_image=2):
-    """
-    Apply data augmentation only to images with bounding boxes.
-    Non-bbox images are preserved in their original location.
-    """
+def augment_dataset(images_folder, labels_folder):
     # Get list of images that have corresponding label files
-    label_files = {os.path.splitext(f)[0] for f in os.listdir(labels_folder) if f.endswith('.txt')}
+    label_files = {
+        os.path.splitext(f)[0]
+        for f in os.listdir(labels_folder)
+        if f.endswith('.txt')
+    }
     image_files = [
         f for f in os.listdir(images_folder)
         if f.lower().endswith(('.jpg', '.jpeg', '.png')) and 
@@ -56,90 +56,77 @@ def augment_dataset(images_folder, labels_folder, augmentations_per_image=2):
     ]
 
     augmentation_pipeline = get_augmentation_pipeline()
-    
+
     # Process images in parallel using ThreadPoolExecutor
     from concurrent.futures import ThreadPoolExecutor
     import threading
-    
+
     thread_local = threading.local()
-    
-    def process_image(args):
-        image_file, aug_idx = args
-        
+
+    def process_image(image_file):
         # Initialize thread-local OpenCV to avoid conflicts
         if not hasattr(thread_local, 'cv2'):
-            thread_local.cv2 = __import__('cv2')
-            
+            import cv2
+            thread_local.cv2 = cv2
+
         image_path = os.path.join(images_folder, image_file)
-        label_path = os.path.join(labels_folder, os.path.splitext(image_file)[0] + '.txt')
-        
+        label_path = os.path.join(
+            labels_folder, os.path.splitext(image_file)[0] + '.txt'
+        )
+
         # Read image
         image = thread_local.cv2.imread(image_path)
         if image is None:
             return
-            
+
         h, w = image.shape[:2]
-        
+
         # Read labels
         bboxes = []
         class_labels = []
         with open(label_path, 'r') as f:
             for line in f:
-                parts = line.strip().split()
-                if len(parts) == 5:
-                    class_id, x_center, y_center, width, height = map(float, parts)
-                    x_center *= w
-                    y_center *= h
-                    width *= w
-                    height *= h
-                    x_min = x_center - width / 2
-                    y_min = y_center - height / 2
-                    x_max = x_center + width / 2
-                    y_max = y_center + height / 2
-                    # Additional validation for bbox area and coordinates
-                    if (x_max > x_min and y_max > y_min and 
-                        width * height > 0 and
-                        x_min >= 0 and y_min >= 0 and 
-                        x_max <= w and y_max <= h):
-                        bboxes.append([x_min, y_min, x_max, y_max])
-                        class_labels.append(int(class_id))
-        
+                class_id, x_center, y_center, width, height = map(float, line.strip().split())
+                x_min = (x_center - width / 2) * w
+                y_min = (y_center - height / 2) * h
+                x_max = (x_center + width / 2) * w
+                y_max = (y_center + height / 2) * h
+                bboxes.append([x_min, y_min, x_max, y_max])
+                class_labels.append(int(class_id))
+
         if not bboxes:
             return
-            
+
         # Apply augmentation
         augmented = augmentation_pipeline(
             image=image,
             bboxes=bboxes,
             class_labels=class_labels
         )
-        
-        # Save augmented image and labels
-        augmented_image_filename = f"{os.path.splitext(image_file)[0]}_aug_{aug_idx}.jpg"
-        augmented_image_path = os.path.join(images_folder, augmented_image_filename)
-        thread_local.cv2.imwrite(augmented_image_path, augmented['image'])
-        
-        # Convert bboxes back to YOLO format and save
-        with open(os.path.join(labels_folder, f"{os.path.splitext(augmented_image_filename)[0]}.txt"), 'w') as f:
-            for cls, bbox in zip(augmented['class_labels'], augmented['bboxes']):
+        aug_image = augmented['image']
+        aug_bboxes = augmented['bboxes']
+        aug_class_labels = augmented['class_labels']
+
+        # Save the augmented image over the original image
+        thread_local.cv2.imwrite(image_path, aug_image)
+
+        # Update labels
+        with open(label_path, 'w') as f:
+            for bbox, class_id in zip(aug_bboxes, aug_class_labels):
                 x_min, y_min, x_max, y_max = bbox
-                x_center = (x_min + x_max) / 2 / w
-                y_center = (y_min + y_max) / 2 / h
+                x_center = ((x_min + x_max) / 2) / w
+                y_center = ((y_min + y_max) / 2) / h
                 width = (x_max - x_min) / w
                 height = (y_max - y_min) / h
-                f.write(f"{cls} {x_center} {y_center} {width} {height}\n")
-    
-    # Create all augmentation tasks
-    tasks = [(img, aug_idx) for img in image_files for aug_idx in range(augmentations_per_image)]
-    
-    # Use ThreadPoolExecutor for parallel processing
+                f.write(f"{class_id} {x_center} {y_center} {width} {height}\n")
+
     with ThreadPoolExecutor(max_workers=os.cpu_count()) as executor:
         list(tqdm(
-            executor.map(process_image, tasks),
-            total=len(tasks),
-            desc="Augmenting dataset"
+            executor.map(process_image, image_files),
+            total=len(image_files),
+            desc="Augmenting images"
         ))
-    
+
     print(f"Đã tăng cường dữ liệu cho {len(image_files)} ảnh có bbox.")
 
 
