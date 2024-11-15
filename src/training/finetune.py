@@ -1,8 +1,11 @@
 from ultralytics import YOLO
-from train import read_augmentation_parameters
+from train import read_augmentation_parameters, patch_ultralytics
 
 
 if __name__ == "__main__":
+    # Apply patches when running locally
+    patch_ultralytics()
+
     # Paths
     model_name = "./models/yolo11x.pt"
     data_dir = "./data/soict-hackathon-2024_dataset"
@@ -19,8 +22,8 @@ if __name__ == "__main__":
     train_params = {
         "data": f"{data_dir}/data.yaml",
         "epochs": 600,
-        "time": 10,
-        "batch": 0.8,
+        "time": 2,
+        "batch": 0.6,
         "cache": "disk",
         "device": 0,
         "project": train_project,
@@ -29,7 +32,7 @@ if __name__ == "__main__":
         "optimizer": "auto",
         "seed": 42,
         "cos_lr": True,
-        "fraction": 1.0,
+        "fraction": 0.1,
         "multi_scale": True,
         "augment": True,
         "show": True,

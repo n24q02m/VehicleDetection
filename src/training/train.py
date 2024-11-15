@@ -9,8 +9,52 @@ assert amp_allclose(YOLO("yolov8m-ghost-p2.yaml"), im)
     ```
 """
 
+import os
+import glob
+import shutil
+from pathlib import Path
 from ultralytics import YOLO
 from distillation import DistillationTrainer
+
+
+def patch_ultralytics():
+    """
+    Patch Ultralytics package with custom modifications from patches directory.
+    Only runs when executing locally, not in Kaggle environment.
+    """
+    try:
+        # Find ultralytics package location
+        import ultralytics
+
+        ultralytics_path = Path(ultralytics.__file__).parent
+
+        # Define patch mappings
+        patches = {
+            "check.py": ultralytics_path / "utils" / "check.py",
+            "task.py": ultralytics_path / "nn" / "tasks.py",
+            "modules_init.py": ultralytics_path / "nn" / "modules" / "__init__.py",
+            "conv.py": ultralytics_path / "nn" / "modules" / "conv.py",
+        }
+
+        # Get patches directory path relative to train.py
+        patches_dir = Path(__file__).parent.parent.parent / "patches"
+
+        # Apply patches
+        print("Applying patches to Ultralytics package...")
+        for patch_file, target_path in patches.items():
+            patch_path = patches_dir / patch_file
+            if patch_path.exists():
+                print(f"Patching {target_path}")
+                shutil.copy2(patch_path, target_path)
+            else:
+                print(f"Warning: Patch file {patch_path} not found")
+
+        print("Patches applied successfully")
+
+    except ImportError:
+        print("Warning: Ultralytics package not found")
+    except Exception as e:
+        print(f"Error applying patches: {e}")
 
 
 def read_augmentation_parameters(file_path):
@@ -30,6 +74,9 @@ def read_augmentation_parameters(file_path):
 
 
 if __name__ == "__main__":
+    # Apply patches when running locally
+    patch_ultralytics()
+
     # Paths
     model_name = "./models/custom-yolov8m-ghost-p2.yaml"
     data_dir = "./data/soict-hackathon-2024_dataset"
