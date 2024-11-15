@@ -70,7 +70,7 @@ if __name__ == "__main__":
             print(f"Found {dataset_zip}. Extracting...")
             extract_zip(os.path.join(data_dir, dataset_zip), data_dir)
         else:
-            zip_url = "https://drive.google.com/uc?id=1MDSqUfS7mvx4qZftbSCfPUhPNAJuKLlE"
+            zip_url = "https://drive.google.com/uc?id=19gL2L2LUjX8A0uxKvYJ5zsYD7gRK02QO"
             success = download_file(zip_url, os.path.join(data_dir, dataset_zip))
             if success:
                 extract_zip(os.path.join(data_dir, dataset_zip), data_dir)
