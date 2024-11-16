@@ -1,5 +1,4 @@
 import os
-import json
 from pathlib import Path
 
 
@@ -14,33 +13,27 @@ def setup_kaggle_auth():
 
             user_secrets = UserSecretsClient()
 
-            # Lấy thông tin xác thực từ secret "n24q02m"
-            secret_value = user_secrets.get_secret("n24q02m")
-            print(f"Secret value: {secret_value}")  # Debug: In giá trị của secret_value
+            # Lấy API key từ secret "n24q02m"
+            api_key = user_secrets.get_secret("n24q02m")
+            print(f"API Key: {api_key}")  # Debug: In giá trị của API key
 
-            credentials = json.loads(secret_value)
-            print(f"Credentials: {credentials}")  # Debug: In giá trị của credentials
+            if api_key:
+                # Thiết lập biến môi trường cho Kaggle API
+                os.environ["KAGGLE_USERNAME"] = "n24q02m"
+                os.environ["KAGGLE_KEY"] = api_key
 
-            username = credentials.get("username")
-            key = credentials.get("key")
+                # Kiểm tra lệnh Kaggle
+                import kaggle
 
-            if username and key:
-                print(f"Username: {username}")  # Debug: In giá trị của username
-                print(f"Key: {key}")  # Debug: In giá trị của key
-
-                # Tạo thư mục .kaggle
-                kaggle_dir = Path.home() / ".kaggle"
-                kaggle_dir.mkdir(exist_ok=True)
-                kaggle_json_path = kaggle_dir / "kaggle.json"
-
-                # Ghi tệp kaggle.json
-                kaggle_credentials = {"username": username, "key": key}
-                with open(kaggle_json_path, "w") as f:
-                    json.dump(kaggle_credentials, f)
-                os.chmod(kaggle_json_path, 0o600)
-                return True
+                try:
+                    datasets = kaggle.api.dataset_list(search="vehicle")
+                    print(f"Found {len(datasets)} datasets.")
+                    return True
+                except Exception as e:
+                    print(f"Lỗi khi sử dụng Kaggle API: {e}")
+                    return False
             else:
-                print("Không thể lấy thông tin xác thực từ Kaggle Secrets.")
+                print("Không thể lấy API key từ Kaggle Secrets.")
                 return False
 
         except Exception as e:
