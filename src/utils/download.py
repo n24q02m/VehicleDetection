@@ -1,5 +1,4 @@
 import os
-import kaggle
 from pathlib import Path
 
 
@@ -7,6 +6,7 @@ def download_dataset(
     dataset_name="n24q02m/augmented-vehicle-detection-dataset",
     dataset_dir="./data/soict-hackathon-2024_dataset",
 ):
+    import kaggle
     """
     Download dataset if not exists locally.
 
@@ -34,6 +34,7 @@ def download_model(
     model_name="n24q02m/finetuned-vehicle-detection-model",
     model_dir="./runs/finetune_yolo11x/weights",
 ):
+    import kaggle
     """
     Download pre-trained model if not exists locally.
 
