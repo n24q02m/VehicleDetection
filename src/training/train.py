@@ -52,8 +52,8 @@ def main():
         "data": f"{data_dir}/data.yaml",
         "epochs": 1,
         "time": 0.5,
-        "batch": 0.7,
-        "cache": "disk",
+        "batch": 0.9,
+        "cache": True,
         "device": 0,
         "project": train_project,
         "name": train_name,
@@ -64,6 +64,7 @@ def main():
         "fraction": 0.05,
         "multi_scale": True,
         "augment": True,
+        "show": True,
         "label_smoothing": 0.1,
         **augmentation_params,
     }
