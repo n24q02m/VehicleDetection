@@ -1,8 +1,17 @@
 from ultralytics import YOLO
-from train import read_augmentation_parameters, patch_ultralytics
-
+from utils.patch import patch_ultralytics
+from utils.read import read_augmentation_parameters
+from utils.download import download_dataset
+from utils.auth import setup_kaggle_auth
 
 if __name__ == "__main__":
+    # Set up Kaggle authentication
+    if not setup_kaggle_auth():
+        raise Exception("Failed to set up Kaggle authentication")
+
+    # Download dataset if needed
+    download_dataset()
+
     # Apply patches when running locally
     patch_ultralytics()
 
