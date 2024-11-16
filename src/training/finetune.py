@@ -1,9 +1,9 @@
 from ultralytics import YOLO
-from ..utils.patch import patch_ultralytics
-from ..utils.read import read_augmentation_parameters
-from ..utils.download import download_dataset
-from ..utils.auth import setup_kaggle_auth
-from ..utils.update import update_model
+from src.utils.patch import patch_ultralytics
+from src.utils.read import read_augmentation_parameters
+from src.utils.download import download_dataset
+from src.utils.auth import setup_kaggle_auth
+from src.utils.update import update_model
 
 if __name__ == "__main__":
     # Set up Kaggle authentication
@@ -59,4 +59,3 @@ if __name__ == "__main__":
         model_dir="./runs/finetuned-model",
         title="Finetuned Vehicle Detection Model",
     )
-    
