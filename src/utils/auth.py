@@ -16,11 +16,18 @@ def setup_kaggle_auth():
 
             # Lấy thông tin xác thực từ secret "n24q02m"
             secret_value = user_secrets.get_secret("n24q02m")
+            print(f"Secret value: {secret_value}")  # Debug: In giá trị của secret_value
+
             credentials = json.loads(secret_value)
+            print(f"Credentials: {credentials}")  # Debug: In giá trị của credentials
+
             username = credentials.get("username")
             key = credentials.get("key")
 
             if username and key:
+                print(f"Username: {username}")  # Debug: In giá trị của username
+                print(f"Key: {key}")  # Debug: In giá trị của key
+
                 # Tạo thư mục .kaggle
                 kaggle_dir = Path.home() / ".kaggle"
                 kaggle_dir.mkdir(exist_ok=True)
