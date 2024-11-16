@@ -6,7 +6,7 @@ from src.utils.download import download_dataset, download_model
 from src.utils.auth import setup_kaggle_auth
 from src.utils.update import update_model
 
-if __name__ == "__main__":
+def main():
     # Set up Kaggle authentication
     if not setup_kaggle_auth():
         raise Exception("Failed to set up Kaggle authentication")
@@ -60,3 +60,6 @@ if __name__ == "__main__":
         model_dir="./runs/final-model",
         title="Final Vehicle Detection Model",
     )
+
+if __name__ == "__main__":
+    main()

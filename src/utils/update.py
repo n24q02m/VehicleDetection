@@ -21,6 +21,8 @@ def update_model(
         license_name (str): License name. Default is "CC0-1.0"
     """
     try:
+        import kaggle
+
         print(f"Updating model {model_name}...")
 
         # Create metadata file
