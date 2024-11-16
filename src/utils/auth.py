@@ -14,9 +14,11 @@ def setup_kaggle_auth():
 
             user_secrets = UserSecretsClient()
 
-            # Lấy username và key từ secrets
-            username = user_secrets.get_secret("KAGGLE_USERNAME")
-            key = user_secrets.get_secret("KAGGLE_KEY")
+            # Lấy thông tin xác thực từ secret "n24q02m"
+            secret_value = user_secrets.get_secret("n24q02m")
+            credentials = json.loads(secret_value)
+            username = credentials.get("username")
+            key = credentials.get("key")
 
             if username and key:
                 # Tạo thư mục .kaggle
