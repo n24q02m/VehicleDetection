@@ -1,3 +1,4 @@
+import os
 from copy import copy
 
 from ultralytics import YOLO
@@ -11,8 +12,12 @@ import torch.nn.functional as F
 class DistillationTrainer(DetectionTrainer):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
-        # Load teacher model
-        self.teacher_model = YOLO("./runs/finetune_yolo11x/weights/best.pt")
+        # Load teacher model from downloaded path
+        self.teacher_model = YOLO("./runs/finetuned-model/weights/best.pt")
+        if not os.path.exists(self.teacher_model.ckpt_path):
+            raise FileNotFoundError(
+                "Teacher model not found. Please run finetune.py first or ensure the model is downloaded."
+            )
         self.teacher_model.model.to(self.device)
         self.teacher_model.model.eval()  # Set teacher model to evaluation mode
         for param in self.teacher_model.model.parameters():

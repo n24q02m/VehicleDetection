@@ -33,7 +33,7 @@ def download_dataset(
 
 def download_model(
     model_name="n24q02m/finetuned-vehicle-detection-model",
-    model_dir="./runs/finetune_yolo11x/weights",
+    model_dir="./runs/finetuned-model/weights",
 ):
     """
     Download pre-trained model if not exists locally.
