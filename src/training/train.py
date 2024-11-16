@@ -4,6 +4,7 @@ from utils.patch import patch_ultralytics
 from utils.read import read_augmentation_parameters
 from utils.download import download_dataset, download_model
 from utils.auth import setup_kaggle_auth
+from utils.update import update_model
 
 if __name__ == "__main__":
     # Set up Kaggle authentication
@@ -52,3 +53,10 @@ if __name__ == "__main__":
 
     # Start training with the custom distillation trainer
     model.train(trainer=DistillationTrainer, **train_params)
+
+    # Update model on Kaggle
+    update_model(
+        model_name="n24q02m/final-vehicle-detection-model",
+        model_dir="./runs/final-model",
+        title="Final Vehicle Detection Model",
+    )

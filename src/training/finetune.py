@@ -3,6 +3,7 @@ from utils.patch import patch_ultralytics
 from utils.read import read_augmentation_parameters
 from utils.download import download_dataset
 from utils.auth import setup_kaggle_auth
+from utils.update import update_model
 
 if __name__ == "__main__":
     # Set up Kaggle authentication
@@ -51,3 +52,11 @@ if __name__ == "__main__":
 
     # Start training
     model.train(**train_params)
+
+    # Update model on Kaggle
+    update_model(
+        model_name="n24q02m/finetuned-vehicle-detection-model",
+        model_dir="./runs/finetuned-model",
+        title="Finetuned Vehicle Detection Model",
+    )
+    
