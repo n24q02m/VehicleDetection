@@ -1,15 +1,22 @@
 import os
-import gdown
+import kaggle
 import zipfile
 import shutil
 
-def download_file(url, destination):
-    if not os.path.exists(destination):
-        print(f"Downloading file from {url}...")
-        gdown.download(url, destination, quiet=False)
-        print(f"Downloaded file to {destination}")
+def download_file(dataset_name, destination_dir):
+    """Download dataset from Kaggle."""
+    if not os.path.exists(destination_dir):
+        print(f"Downloading dataset {dataset_name}...")
+        try:
+            kaggle.api.dataset_download_files(dataset_name, path=destination_dir, unzip=False)
+            print(f"Downloaded dataset to {destination_dir}")
+            return True
+        except Exception as e:
+            print(f"Error downloading dataset: {e}")
+            return False
     else:
-        print(f"File {destination} already exists.")
+        print(f"Directory {destination_dir} already exists.")
+        return True
 
 def create_folders():
     base_dir = "./data/soict-hackathon-2024_dataset"
@@ -48,19 +55,18 @@ def extract_zip(zip_path, extract_to):
 
 def main():
     os.makedirs("./data", exist_ok=True)
-    zip_url = "https://drive.google.com/uc?id=1MDSqUfS7mvx4qZftbSCfPUhPNAJuKLlE"
-    zip_path = "./data/train_20241023.zip"
+    dataset_name = "n24q02m/raw-vehicle-detection-dataset"
     extract_dir = "./data/extracted_data"
     os.makedirs(extract_dir, exist_ok=True)
 
-    if not os.path.exists(zip_path):
-        download_file(zip_url, zip_path)
-    else:
-        print(f"Tệp {zip_path} đã tồn tại.")
-
+    # Download dataset from Kaggle
+    if download_file(dataset_name, "./data"):
+        zip_files = [f for f in os.listdir("./data") if f.endswith('.zip')]
+        for zip_file in zip_files:
+            extract_zip(os.path.join("./data", zip_file), extract_dir)
+    
     create_folders()
     create_yaml()
-    extract_zip(zip_path, extract_dir)
 
 if __name__ == "__main__":
     main()

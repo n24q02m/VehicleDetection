@@ -22,7 +22,7 @@ if __name__ == "__main__":
     train_params = {
         "data": f"{data_dir}/data.yaml",
         "epochs": 600,
-        "time": 8,
+        "time": 7,
         "batch": 0.9,
         "cache": True,
         "device": 0,

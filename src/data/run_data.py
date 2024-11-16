@@ -1,5 +1,6 @@
 import os
-import gdown
+import kaggle
+import json
 import zipfile
 import shutil
 import multiprocessing
@@ -10,17 +11,16 @@ from explore_dataset import main as explore_dataset_main
 from augment_data import main as augment_data_main
 from tqdm import tqdm
 
-def download_file(url, destination):
-    """Download file from URL to the specified destination using gdown."""
-    print(f"Downloading file from {url}...")
+def download_file(dataset_name, destination):
+    """Download dataset from Kaggle."""
+    print(f"Downloading dataset {dataset_name}...")
     try:
-        gdown.download(url, destination, quiet=False)
-        print(f"Downloaded file to {destination}")
+        kaggle.api.dataset_download_files(dataset_name, path=destination, unzip=False)
+        print(f"Downloaded dataset to {destination}")
         return True
     except Exception as e:
-        print(f"Error downloading file: {e}")
+        print(f"Error downloading dataset: {e}")
         return False
-
 
 def extract_member(member, zip_path, extract_to):
     with ZipFile(zip_path, "r") as zip_ref:
@@ -33,10 +33,8 @@ def extract_zip(zip_path, extract_to):
     with ZipFile(zip_path, "r") as zip_ref:
         members = zip_ref.namelist()
 
-    # Chuẩn bị danh sách tham số cho multiprocessing
     args = [(member, zip_path, extract_to) for member in members]
 
-    # Sử dụng multiprocessing Pool để tăng tốc độ giải nén
     with multiprocessing.Pool() as pool:
         list(tqdm(
             pool.starmap(extract_member, args),
@@ -45,52 +43,61 @@ def extract_zip(zip_path, extract_to):
         ))
     print("Extraction completed.")
 
+def update_kaggle_dataset(dataset_name, folder_path):
+    """Update Kaggle dataset with new version."""
+    print(f"Updating Kaggle dataset {dataset_name}...")
+    try:
+        metadata = {
+            "title": "Augmented Vehicle Detection Dataset",
+            "id": f"{dataset_name}",
+            "licenses": [{"name": "CC0-1.0"}]
+        }
+        with open(os.path.join(folder_path, "dataset-metadata.json"), "w") as f:
+            json.dump(metadata, f)
 
-def zip_dataset(folder_path, output_path):
-    """Compress the dataset folder into a zip file."""
-    print(f"Compressing {folder_path} into {output_path}...")
-    # Ensure the output path does not have the .zip extension for make_archive
-    base_name = os.path.splitext(output_path)[0]
-    shutil.make_archive(base_name=base_name, format='zip', root_dir=folder_path)
-
+        kaggle.api.dataset_create_version(folder_path, version_notes="Updated dataset")
+        print("Dataset updated successfully")
+        return True
+    except Exception as e:
+        print(f"Error updating dataset: {e}")
+        return False
 
 if __name__ == "__main__":
-    dataset_zip = "soict-hackathon-2024_dataset.zip"
-    data_dir = "./data"
-    dataset_dir = os.path.join(data_dir, "soict-hackathon-2024_dataset")
+    dataset_dir = "./data/soict-hackathon-2024_dataset"
+    dataset_name = "n24q02m/augmented-vehicle-detection-dataset"
 
-    # Create data directory if it doesn't exist
-    os.makedirs(data_dir, exist_ok=True)
+    os.makedirs(dataset_dir, exist_ok=True)
 
-    # Check if dataset directory already exists
+    dataset_updated = False
+
     if os.path.exists(dataset_dir):
         print("Dataset directory already exists. Skipping download and extraction.")
     else:
-        if os.path.exists(os.path.join(data_dir, dataset_zip)):
-            print(f"Found {dataset_zip}. Extracting...")
-            extract_zip(os.path.join(data_dir, dataset_zip), data_dir)
+        success = download_file(dataset_name, dataset_dir)
+        if success:
+            zip_files = [f for f in os.listdir(dataset_dir) if f.endswith(".zip")]
+            for zip_file in zip_files:
+                extract_zip(os.path.join(dataset_dir, zip_file), dataset_dir)
         else:
-            zip_url = "https://drive.google.com/uc?id=19gL2L2LUjX8A0uxKvYJ5zsYD7gRK02QO"
-            success = download_file(zip_url, os.path.join(data_dir, dataset_zip))
-            if success:
-                extract_zip(os.path.join(data_dir, dataset_zip), data_dir)
-            else:
-                print("Download failed. Running data processing scripts...")
-                download_dataset_main()
-                explore_dataset_main()
-                preprocess_data_main()
-                augment_data_main()
+            print("Download failed. Running data processing scripts...")
+            download_dataset_main()
+            explore_dataset_main()
+            preprocess_data_main()
+            augment_data_main()
+            dataset_updated = True
 
-        # Verify extraction
         if not os.path.exists(dataset_dir):
             print("Extraction failed or dataset directory missing. Running data processing scripts...")
             download_dataset_main()
             explore_dataset_main()
             preprocess_data_main()
             augment_data_main()
+            dataset_updated = True
         else:
             print("Dataset ready.")
 
-    # Compress dataset after processing
-    zip_dataset(dataset_dir, os.path.join(data_dir, dataset_zip))
-    print("Dataset compressed.")
+    # Update Kaggle dataset only if data was processed
+    if dataset_updated:
+        update_kaggle_dataset(dataset_name, dataset_dir)
+    else:
+        print("No changes made to dataset. Skipping Kaggle update.")
