@@ -4,12 +4,13 @@ from src.utils.patch import patch_ultralytics
 from src.utils.read import read_augmentation_parameters
 from src.utils.download import download_dataset, download_model
 from src.utils.auth import setup_kaggle_auth
-from src.utils.update import update_model
 
 def main():
     # Set up Kaggle authentication
     if not setup_kaggle_auth():
         raise Exception("Failed to set up Kaggle authentication")
+
+    from src.utils.update import update_model
 
     # Download data and model if needed
     download_dataset()
