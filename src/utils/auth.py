@@ -15,23 +15,13 @@ def setup_kaggle_auth():
 
             # Lấy API key từ secret "n24q02m"
             api_key = user_secrets.get_secret("n24q02m")
-            print(f"API Key: {api_key}")  # Debug: In giá trị của API key
 
             if api_key:
                 # Thiết lập biến môi trường cho Kaggle API
                 os.environ["KAGGLE_USERNAME"] = "n24q02m"
                 os.environ["KAGGLE_KEY"] = api_key
 
-                # Kiểm tra lệnh Kaggle
-                import kaggle
-
-                try:
-                    datasets = kaggle.api.dataset_list(search="vehicle")
-                    print(f"Found {len(datasets)} datasets.")
-                    return True
-                except Exception as e:
-                    print(f"Lỗi khi sử dụng Kaggle API: {e}")
-                    return False
+                return True
             else:
                 print("Không thể lấy API key từ Kaggle Secrets.")
                 return False
