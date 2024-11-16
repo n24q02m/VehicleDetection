@@ -5,11 +5,11 @@ import json
 def setup_kaggle_auth():
     """Set up Kaggle authentication using environment variables."""
     try:
-        # Check if we're running on Kaggle
+        # Check if running on Kaggle
         on_kaggle = "KAGGLE_URL_BASE" in os.environ
 
         if on_kaggle:
-            # Verify that secrets are available
+            # Verify secrets are available
             if "KAGGLE_USERNAME" not in os.environ or "KAGGLE_KEY" not in os.environ:
                 print(
                     "Kaggle secrets not found. Please configure them in the notebook settings."
@@ -28,6 +28,7 @@ def setup_kaggle_auth():
 
             with open(kaggle_json_path, "w") as f:
                 json.dump(kaggle_creds, f)
+
             os.chmod(kaggle_json_path, 0o600)
 
             return True
@@ -36,12 +37,10 @@ def setup_kaggle_auth():
             kaggle_json_path = os.path.join(
                 os.path.expanduser("~"), ".kaggle", "kaggle.json"
             )
-            if os.path.exists(kaggle_json_path):
-                os.chmod(kaggle_json_path, 0o600)
-                return True
-            else:
-                print("kaggle.json not found in ~/.kaggle/")
+            if not os.path.exists(kaggle_json_path):
+                print("Local kaggle.json not found.")
                 return False
+            return True
 
     except Exception as e:
         print(f"Error setting up Kaggle authentication: {e}")
