@@ -52,8 +52,8 @@ def main():
         "data": f"{data_dir}/data.yaml",
         "epochs": 1,
         "time": 0.5,
-        "batch": 0.9,
-        "cache": True,
+        "batch": 0.8,
+        "cache": "disk",
         "device": 0,
         "project": train_project,
         "name": train_name,
@@ -75,9 +75,14 @@ def main():
     # Update model on Kaggle
     update_model(
         model_name="n24q02m/final-vehicle-detection-model",
-        model_dir=str(Path("./runs/final-model/weights",).absolute()),
+        model_dir=str(
+            Path(
+                "./runs/final-model/weights",
+            ).absolute()
+        ),
         title="Final Vehicle Detection Model",
     )
+
 
 if __name__ == "__main__":
     main()
