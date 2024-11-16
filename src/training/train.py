@@ -50,10 +50,10 @@ def main():
     # Training parameters
     train_params = {
         "data": f"{data_dir}/data.yaml",
-        "epochs": 1,
-        "time": 0.5,
-        "batch": 0.8,
-        "cache": "disk",
+        "epochs": 300,
+        "time": 7,
+        "batch": -1,
+        "cache": False,
         "device": 0,
         "project": train_project,
         "name": train_name,
@@ -61,7 +61,7 @@ def main():
         "optimizer": "auto",
         "seed": 42,
         "cos_lr": True,
-        "fraction": 0.05,
+        "fraction": 0.5,
         "multi_scale": True,
         "augment": True,
         "show": True,
