@@ -7,8 +7,9 @@ sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "../..")
 from ultralytics import YOLO
 from src.utils.patch import patch_ultralytics
 from src.utils.read import read_augmentation_parameters
-from src.utils.download import download_dataset
+from src.utils.download import download_dataset, download_model
 from src.utils.auth import setup_kaggle_auth
+from src.utils.update import update_model
 
 
 def main():
@@ -16,10 +17,15 @@ def main():
     if not setup_kaggle_auth():
         raise Exception("Failed to set up Kaggle authentication")
 
-    from src.utils.update import update_model
-
     # Download dataset if needed
     download_dataset()
+
+    # Download model from Kaggle
+    if not download_model(
+        model_name="n24q02m/finetuned-vehicle-detection-model",
+        model_dir="./runs/finetuned-model/weights",
+    ):
+        raise Exception("Failed to download finetuned model from Kaggle")
 
     # Apply patches when running locally
     patch_ultralytics()
@@ -41,7 +47,7 @@ def main():
         "data": f"{data_dir}/data.yaml",
         "epochs": 300,
         "time": 7,
-        "batch": -1,
+        "batch": 2,
         "imgsz": 480,
         "cache": "disk",
         "device": 0,
@@ -51,7 +57,7 @@ def main():
         "optimizer": "auto",
         "seed": 42,
         "cos_lr": True,
-        "fraction": 0.3,
+        "fraction": 1.0,
         "multi_scale": True,
         "augment": True,
         "show": True,
