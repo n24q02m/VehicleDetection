@@ -46,6 +46,13 @@ def extract_zip(zip_path, extract_to):
                 desc="Extracting",
             )
         )
+        list(
+            tqdm(
+                pool.starmap(extract_member, args),
+                total=len(members),
+                desc="Extracting",
+            )
+        )
     print("Extraction completed.")
 
 
@@ -56,6 +63,7 @@ def update_kaggle_dataset(dataset_name, folder_path):
         metadata = {
             "title": "Augmented Vehicle Detection Dataset",
             "id": f"{dataset_name}",
+            "licenses": [{"name": "CC0-1.0"}],
             "licenses": [{"name": "CC0-1.0"}],
         }
         with open(os.path.join(folder_path, "dataset-metadata.json"), "w") as f:
@@ -91,6 +99,14 @@ def main(use_existing_dataset=True):
     """
     dataset_dir = "./data/soict-hackathon-2024_dataset"
     dataset_name = "n24q02m/augmented-vehicle-detection-dataset"
+    explore_dir = "./runs/explore_dataset"
+
+    if not use_existing_dataset:
+        # Remove existing dataset and explore directories
+        if os.path.exists(dataset_dir):
+            shutil.rmtree(dataset_dir)
+        if os.path.exists(explore_dir):
+            shutil.rmtree(explore_dir)
 
     if use_existing_dataset:
         if os.path.exists(dataset_dir):
