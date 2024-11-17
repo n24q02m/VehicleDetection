@@ -13,17 +13,18 @@ def setup_kaggle_auth():
 
             user_secrets = UserSecretsClient()
 
-            # Lấy API key từ secret "n24q02m"
-            api_key = user_secrets.get_secret("n24q02m")
+            # Lấy username và API key từ Kaggle Secrets
+            username = user_secrets.get_secret("username")
+            api_key = user_secrets.get_secret("kaggle-api-key")
 
-            if api_key:
+            if username and api_key:
                 # Thiết lập biến môi trường cho Kaggle API
-                os.environ["KAGGLE_USERNAME"] = "n24q02m"
+                os.environ["KAGGLE_USERNAME"] = username
                 os.environ["KAGGLE_KEY"] = api_key
 
                 return True
             else:
-                print("Không thể lấy API key từ Kaggle Secrets.")
+                print("Không thể lấy username hoặc API key từ Kaggle Secrets.")
                 return False
 
         except Exception as e:
