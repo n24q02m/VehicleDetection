@@ -11,6 +11,7 @@ from explore_dataset import main as explore_dataset_main
 from augment_data import main as augment_data_main
 from tqdm import tqdm
 
+
 def download_file(dataset_name, destination):
     """Download dataset from Kaggle."""
     print(f"Downloading dataset {dataset_name}...")
@@ -22,9 +23,11 @@ def download_file(dataset_name, destination):
         print(f"Error downloading dataset: {e}")
         return False
 
+
 def extract_member(member, zip_path, extract_to):
     with ZipFile(zip_path, "r") as zip_ref:
         zip_ref.extract(member, extract_to)
+
 
 def extract_zip(zip_path, extract_to):
     """Extract zip file using multiprocessing for speed."""
@@ -36,12 +39,15 @@ def extract_zip(zip_path, extract_to):
     args = [(member, zip_path, extract_to) for member in members]
 
     with multiprocessing.Pool() as pool:
-        list(tqdm(
-            pool.starmap(extract_member, args),
-            total=len(members),
-            desc="Extracting"
-        ))
+        list(
+            tqdm(
+                pool.starmap(extract_member, args),
+                total=len(members),
+                desc="Extracting",
+            )
+        )
     print("Extraction completed.")
+
 
 def update_kaggle_dataset(dataset_name, folder_path):
     """Update Kaggle dataset with new version."""
@@ -50,7 +56,7 @@ def update_kaggle_dataset(dataset_name, folder_path):
         metadata = {
             "title": "Augmented Vehicle Detection Dataset",
             "id": f"{dataset_name}",
-            "licenses": [{"name": "CC0-1.0"}]
+            "licenses": [{"name": "CC0-1.0"}],
         }
         with open(os.path.join(folder_path, "dataset-metadata.json"), "w") as f:
             json.dump(metadata, f)
@@ -62,15 +68,24 @@ def update_kaggle_dataset(dataset_name, folder_path):
         print(f"Error updating dataset: {e}")
         return False
 
-if __name__ == "__main__":
+
+def main(use_existing_dataset=True):
     dataset_dir = "./data/soict-hackathon-2024_dataset"
     dataset_name = "n24q02m/augmented-vehicle-detection-dataset"
+    explore_dir = "./runs/explore_dataset"
+
+    if not use_existing_dataset:
+        # Remove existing dataset and explore directories
+        if os.path.exists(dataset_dir):
+            shutil.rmtree(dataset_dir)
+        if os.path.exists(explore_dir):
+            shutil.rmtree(explore_dir)
 
     os.makedirs(dataset_dir, exist_ok=True)
 
     dataset_updated = False
 
-    if os.path.exists(dataset_dir):
+    if use_existing_dataset and os.path.exists(dataset_dir):
         print("Dataset directory already exists. Skipping download and extraction.")
     else:
         success = download_file(dataset_name, dataset_dir)
@@ -87,7 +102,9 @@ if __name__ == "__main__":
             dataset_updated = True
 
         if not os.path.exists(dataset_dir):
-            print("Extraction failed or dataset directory missing. Running data processing scripts...")
+            print(
+                "Extraction failed or dataset directory missing. Running data processing scripts..."
+            )
             download_dataset_main()
             explore_dataset_main()
             preprocess_data_main()
@@ -101,3 +118,7 @@ if __name__ == "__main__":
         update_kaggle_dataset(dataset_name, dataset_dir)
     else:
         print("No changes made to dataset. Skipping Kaggle update.")
+
+
+if __name__ == "__main__":
+    main(use_existing_dataset=False)  # Set to False to force reprocessing
