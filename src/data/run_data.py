@@ -11,6 +11,7 @@ from explore_dataset import main as explore_dataset_main
 from augment_data import main as augment_data_main
 from tqdm import tqdm
 
+
 def download_file(dataset_name, destination):
     """Download dataset from Kaggle."""
     print(f"Downloading dataset {dataset_name}...")
@@ -22,9 +23,11 @@ def download_file(dataset_name, destination):
         print(f"Error downloading dataset: {e}")
         return False
 
+
 def extract_member(member, zip_path, extract_to):
     with ZipFile(zip_path, "r") as zip_ref:
         zip_ref.extract(member, extract_to)
+
 
 def extract_zip(zip_path, extract_to):
     """Extract zip file using multiprocessing for speed."""
@@ -36,12 +39,15 @@ def extract_zip(zip_path, extract_to):
     args = [(member, zip_path, extract_to) for member in members]
 
     with multiprocessing.Pool() as pool:
-        list(tqdm(
-            pool.starmap(extract_member, args),
-            total=len(members),
-            desc="Extracting"
-        ))
+        list(
+            tqdm(
+                pool.starmap(extract_member, args),
+                total=len(members),
+                desc="Extracting",
+            )
+        )
     print("Extraction completed.")
+
 
 def update_kaggle_dataset(dataset_name, folder_path):
     """Update Kaggle dataset with new version."""
@@ -50,7 +56,7 @@ def update_kaggle_dataset(dataset_name, folder_path):
         metadata = {
             "title": "Augmented Vehicle Detection Dataset",
             "id": f"{dataset_name}",
-            "licenses": [{"name": "CC0-1.0"}]
+            "licenses": [{"name": "CC0-1.0"}],
         }
         with open(os.path.join(folder_path, "dataset-metadata.json"), "w") as f:
             json.dump(metadata, f)
@@ -62,42 +68,67 @@ def update_kaggle_dataset(dataset_name, folder_path):
         print(f"Error updating dataset: {e}")
         return False
 
-if __name__ == "__main__":
+
+def clean_directories():
+    """Clean dataset and explore directories."""
+    dirs_to_clean = [
+        "./data/soict-hackathon-2024_dataset",
+        "./data/extracted_data",
+        "./runs/explore_dataset",
+    ]
+    for dir_path in dirs_to_clean:
+        if os.path.exists(dir_path):
+            shutil.rmtree(dir_path)
+            print(f"Removed {dir_path}")
+
+
+def main(use_existing_dataset=True):
+    """
+    Main function for dataset processing pipeline.
+
+    Args:
+        use_existing_dataset (bool): Whether to use existing dataset (True) or create new one (False)
+    """
     dataset_dir = "./data/soict-hackathon-2024_dataset"
     dataset_name = "n24q02m/augmented-vehicle-detection-dataset"
 
-    os.makedirs(dataset_dir, exist_ok=True)
+    if use_existing_dataset:
+        if os.path.exists(dataset_dir):
+            print("Dataset directory already exists. Using existing dataset.")
+        else:
+            print("Dataset directory not found. Attempting to download from Kaggle...")
+            os.makedirs(dataset_dir, exist_ok=True)
+            success = download_file(dataset_name, dataset_dir)
 
-    dataset_updated = False
-
-    if os.path.exists(dataset_dir):
-        print("Dataset directory already exists. Skipping download and extraction.")
+            if success:
+                zip_files = [f for f in os.listdir(dataset_dir) if f.endswith(".zip")]
+                for zip_file in zip_files:
+                    extract_zip(os.path.join(dataset_dir, zip_file), dataset_dir)
+                print("Dataset downloaded and extracted successfully.")
+            else:
+                print("Error: Failed to download dataset from Kaggle.")
+                exit(1)
     else:
-        success = download_file(dataset_name, dataset_dir)
-        if success:
-            zip_files = [f for f in os.listdir(dataset_dir) if f.endswith(".zip")]
-            for zip_file in zip_files:
-                extract_zip(os.path.join(dataset_dir, zip_file), dataset_dir)
-        else:
-            print("Download failed. Running data processing scripts...")
-            download_dataset_main()
-            explore_dataset_main()
-            preprocess_data_main()
-            augment_data_main()
-            dataset_updated = True
+        print("Creating new dataset...")
+        # Clean existing directories
+        clean_directories()
 
-        if not os.path.exists(dataset_dir):
-            print("Extraction failed or dataset directory missing. Running data processing scripts...")
-            download_dataset_main()
-            explore_dataset_main()
-            preprocess_data_main()
-            augment_data_main()
-            dataset_updated = True
-        else:
-            print("Dataset ready.")
+        # Create new dataset
+        os.makedirs(dataset_dir, exist_ok=True)
 
-    # Update Kaggle dataset only if data was processed
-    if dataset_updated:
+        # Run data processing pipeline
+        print("Running data processing pipeline...")
+        download_dataset_main()  # Download raw data
+        explore_dataset_main()  # Explore dataset
+        preprocess_data_main()  # Preprocess data
+        augment_data_main()  # Augment data
+
+        # Update dataset on Kaggle
+        print("Uploading new dataset to Kaggle...")
         update_kaggle_dataset(dataset_name, dataset_dir)
-    else:
-        print("No changes made to dataset. Skipping Kaggle update.")
+
+
+if __name__ == "__main__":
+    # Set configuration
+    use_existing_dataset = False  # Set to False to create new dataset
+    main(use_existing_dataset)
