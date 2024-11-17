@@ -24,11 +24,17 @@ def patch_ultralytics():
 
         # Define patch mappings
         patches = {
-            "check.py": ultralytics_path / "utils" / "check.py",
             "task.py": ultralytics_path / "nn" / "tasks.py",
             "modules_init.py": ultralytics_path / "nn" / "modules" / "__init__.py",
             "conv.py": ultralytics_path / "nn" / "modules" / "conv.py",
         }
+
+        # Determine which check file to use based on the script name
+        script_name = Path(__file__).stem
+        if script_name == "finetune":
+            patches["finetune_check.py"] = ultralytics_path / "utils" / "check.py"
+        elif script_name == "train":
+            patches["train_check.py"] = ultralytics_path / "utils" / "check.py"
 
         # Get patches directory path relative to this script
         patches_dir = Path(__file__).parent.parent.parent / "patches"
