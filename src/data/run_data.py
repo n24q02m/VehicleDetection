@@ -75,9 +75,12 @@ def update_kaggle_dataset(dataset_name, folder_path):
             json.dump(metadata, f)
 
         try:
-            # Create new version
+            # Create new version with dir-mode enabled
             kaggle.api.dataset_create_version(
-                folder=folder_path, version_notes="Updated dataset", quiet=False
+                folder=folder_path,
+                version_notes="Updated dataset",
+                quiet=False,
+                dir_mode="zip",
             )
             print("Dataset updated successfully")
             return True
