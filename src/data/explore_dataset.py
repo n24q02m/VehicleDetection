@@ -7,6 +7,7 @@ from matplotlib.patches import Rectangle
 from tqdm import tqdm
 from scipy.ndimage import gaussian_filter
 
+
 def get_image_paths(data_folder):
     image_paths = []
     for root, _, files in os.walk(data_folder):
@@ -51,11 +52,11 @@ def explore_labels(label_paths, title, output_dir):
     """Explore labels using parallel processing."""
     from concurrent.futures import ThreadPoolExecutor
     import threading
-    
+
     thread_local = threading.local()
     class_counts = {}
     total_labels = 0
-    
+
     def process_label_file(label_path):
         counts = {}
         num_labels = 0
@@ -65,16 +66,20 @@ def explore_labels(label_paths, title, output_dir):
                 counts[class_id] = counts.get(class_id, 0) + 1
                 num_labels += 1
         return counts, num_labels
-    
+
     # Process files in parallel
     with ThreadPoolExecutor(max_workers=os.cpu_count()) as executor:
-        results = list(tqdm(
-            executor.map(process_label_file, label_paths),
-            total=len(label_paths),
-            desc=f"Processing {title} labels"
-        ))
-    
+        results = list(
+            tqdm(
+                executor.map(process_label_file, label_paths),
+                total=len(label_paths),
+                desc=f"Processing {title} labels",
+            )
+        )
+
     # Aggregate results
+    class_counts = {}
+    total_labels = 0
     for counts, num_labels in results:
         total_labels += num_labels
         for class_id, count in counts.items():
@@ -82,7 +87,7 @@ def explore_labels(label_paths, title, output_dir):
 
     print(f"{title}: {total_labels} nhãn")
     print(f"Phân bố nhãn: {class_counts}")
-    
+
     # Plot distribution
     classes = list(class_counts.keys())
     counts = [class_counts[cls] for cls in classes]
@@ -223,58 +228,60 @@ def analyze_image_colors(image_paths, output_dir):
     """Analyze image colors using parallel processing."""
     from concurrent.futures import ThreadPoolExecutor
     import threading
-    
+
     thread_local = threading.local()
-    
+
     def process_image(image_path):
         # Initialize thread-local OpenCV
-        if not hasattr(thread_local, 'cv2'):
-            thread_local.cv2 = __import__('cv2')
-            
+        if not hasattr(thread_local, "cv2"):
+            thread_local.cv2 = __import__("cv2")
+
         image = thread_local.cv2.imread(image_path)
         if image is None:
             return None
-            
+
         hsv = thread_local.cv2.cvtColor(image, thread_local.cv2.COLOR_BGR2HSV)
         return {
-            'brightness': np.mean(hsv[:, :, 2]),
-            'saturation': np.mean(hsv[:, :, 1]),
-            'contrast': np.std(hsv[:, :, 2])
+            "brightness": np.mean(hsv[:, :, 2]),
+            "saturation": np.mean(hsv[:, :, 1]),
+            "contrast": np.std(hsv[:, :, 2]),
         }
-    
+
     # Process images in parallel
     with ThreadPoolExecutor(max_workers=os.cpu_count()) as executor:
-        results = list(tqdm(
-            executor.map(process_image, image_paths),
-            total=len(image_paths),
-            desc="Analyzing image colors"
-        ))
-    
+        results = list(
+            tqdm(
+                executor.map(process_image, image_paths),
+                total=len(image_paths),
+                desc="Analyzing image colors",
+            )
+        )
+
     # Filter out None results and separate values
     results = [r for r in results if r is not None]
-    brightness_values = [r['brightness'] for r in results]
-    saturation_values = [r['saturation'] for r in results]
-    contrast_values = [r['contrast'] for r in results]
-    
+    brightness_values = [r["brightness"] for r in results]
+    saturation_values = [r["saturation"] for r in results]
+    contrast_values = [r["contrast"] for r in results]
+
     # Plot distributions
     plt.figure()
     plt.hist(brightness_values, bins=50)
     plt.title("Brightness Distribution")
     plt.savefig(os.path.join(output_dir, "brightness_distribution.png"))
     plt.close()
-    
+
     plt.figure()
     plt.hist(contrast_values, bins=50)
     plt.title("Contrast Distribution")
     plt.savefig(os.path.join(output_dir, "contrast_distribution.png"))
     plt.close()
-    
+
     plt.figure()
     plt.hist(saturation_values, bins=50)
     plt.title("Saturation Distribution")
     plt.savefig(os.path.join(output_dir, "saturation_distribution.png"))
     plt.close()
-    
+
     print("Đã lưu biểu đồ phân bố màu sắc.")
 
 
@@ -298,7 +305,7 @@ def main():
     image_paths_dict = {
         "Tổng số": total_images,
         "Ban ngày": daytime_images,
-        "Ban đêm": nighttime_images
+        "Ban đêm": nighttime_images,
     }
 
     # Gọi hàm explore_images_combined
@@ -320,6 +327,7 @@ def main():
     analyze_box_dimensions(total_labels, output_dir)
     analyze_bbox_heatmap(total_labels, output_dir)
     analyze_image_colors(total_images, output_dir)
+
 
 if __name__ == "__main__":
     main()

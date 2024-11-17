@@ -4,6 +4,7 @@ import json
 import zipfile
 import shutil
 import multiprocessing
+from pathlib import Path
 from zipfile import ZipFile
 from download_dataset import main as download_dataset_main
 from preprocess_data import main as preprocess_data_main
@@ -60,18 +61,30 @@ def update_kaggle_dataset(dataset_name, folder_path):
     """Update Kaggle dataset with new version."""
     print(f"Updating Kaggle dataset {dataset_name}...")
     try:
+        # Convert to absolute path
+        folder_path = str(Path(folder_path).absolute())
+
+        # Create metadata file
         metadata = {
             "title": "Augmented Vehicle Detection Dataset",
-            "id": f"{dataset_name}",
-            "licenses": [{"name": "CC0-1.0"}],
+            "id": dataset_name,
             "licenses": [{"name": "CC0-1.0"}],
         }
-        with open(os.path.join(folder_path, "dataset-metadata.json"), "w") as f:
+        metadata_path = os.path.join(folder_path, "dataset-metadata.json")
+        with open(metadata_path, "w") as f:
             json.dump(metadata, f)
 
-        kaggle.api.dataset_create_version(folder_path, version_notes="Updated dataset")
-        print("Dataset updated successfully")
-        return True
+        try:
+            # Create new version
+            kaggle.api.dataset_create_version(
+                folder=folder_path, version_notes="Updated dataset", quiet=False
+            )
+            print("Dataset updated successfully")
+            return True
+        except Exception as e:
+            print(f"Error during Kaggle API call: {e}")
+            return False
+
     except Exception as e:
         print(f"Error updating dataset: {e}")
         return False
@@ -101,13 +114,6 @@ def main(use_existing_dataset=True):
     dataset_name = "n24q02m/augmented-vehicle-detection-dataset"
     explore_dir = "./runs/explore_dataset"
 
-    if not use_existing_dataset:
-        # Remove existing dataset and explore directories
-        if os.path.exists(dataset_dir):
-            shutil.rmtree(dataset_dir)
-        if os.path.exists(explore_dir):
-            shutil.rmtree(explore_dir)
-
     if use_existing_dataset:
         if os.path.exists(dataset_dir):
             print("Dataset directory already exists. Using existing dataset.")
@@ -128,9 +134,6 @@ def main(use_existing_dataset=True):
         print("Creating new dataset...")
         # Clean existing directories
         clean_directories()
-
-        # Create new dataset
-        os.makedirs(dataset_dir, exist_ok=True)
 
         # Run data processing pipeline
         print("Running data processing pipeline...")
