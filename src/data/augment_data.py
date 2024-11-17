@@ -11,28 +11,28 @@ def get_augmentation_pipeline():
     """
     return A.Compose(
         [
-            A.HorizontalFlip(p=0.3),
-            A.ShiftScaleRotate(scale_limit=0.3, rotate_limit=15, p=0.3),
+            A.HorizontalFlip(p=0.5),
+            A.ShiftScaleRotate(scale_limit=0.3, rotate_limit=15, p=0.5),
             A.HueSaturationValue(
-                hue_shift_limit=30, sat_shift_limit=30, val_shift_limit=15, p=0.3
+                hue_shift_limit=30, sat_shift_limit=30, val_shift_limit=15, p=0.5
             ),
             A.RandomBrightnessContrast(
-                brightness_limit=0.25, contrast_limit=0.15, p=0.3
+                brightness_limit=0.25, contrast_limit=0.15, p=0.5
             ),
             A.OneOf(
                 [
                     A.GaussianBlur(blur_limit=3, sigma_limit=(0.1, 2.0), p=1.0),
                     A.GaussNoise(var_limit=(0.0, 1.56), p=1.0),
                 ],
-                p=0.3,
+                p=0.5,
             ),
-            A.RandomRain(p=0.3),
-            A.RandomFog(p=0.3),
-            A.RandomSnow(p=0.3),
-            A.RandomShadow(p=0.3),
-            A.MotionBlur(blur_limit=3, p=0.3),
-            A.RandomSunFlare(p=0.3),
-            A.CLAHE(clip_limit=2.0, tile_grid_size=(8, 8), p=0.3),
+            A.RandomRain(p=0.5),
+            A.RandomFog(p=0.5),
+            A.RandomSnow(p=0.5),
+            A.RandomShadow(p=0.5),
+            A.MotionBlur(blur_limit=3, p=0.5),
+            A.RandomSunFlare(p=0.5),
+            A.CLAHE(clip_limit=2.0, tile_grid_size=(8, 8), p=0.5),
         ],
         bbox_params=A.BboxParams(
             format="pascal_voc",
@@ -46,14 +46,13 @@ def get_augmentation_pipeline():
 def augment_dataset(images_folder, labels_folder):
     # Get list of images that have corresponding label files
     label_files = {
-        os.path.splitext(f)[0]
-        for f in os.listdir(labels_folder)
-        if f.endswith('.txt')
+        os.path.splitext(f)[0] for f in os.listdir(labels_folder) if f.endswith(".txt")
     }
     image_files = [
-        f for f in os.listdir(images_folder)
-        if f.lower().endswith(('.jpg', '.jpeg', '.png')) and 
-        os.path.splitext(f)[0] in label_files
+        f
+        for f in os.listdir(images_folder)
+        if f.lower().endswith((".jpg", ".jpeg", ".png"))
+        and os.path.splitext(f)[0] in label_files
     ]
 
     augmentation_pipeline = get_augmentation_pipeline()
@@ -66,13 +65,14 @@ def augment_dataset(images_folder, labels_folder):
 
     def process_image(image_file):
         # Initialize thread-local OpenCV to avoid conflicts
-        if not hasattr(thread_local, 'cv2'):
+        if not hasattr(thread_local, "cv2"):
             import cv2
+
             thread_local.cv2 = cv2
 
         image_path = os.path.join(images_folder, image_file)
         label_path = os.path.join(
-            labels_folder, os.path.splitext(image_file)[0] + '.txt'
+            labels_folder, os.path.splitext(image_file)[0] + ".txt"
         )
 
         # Read image
@@ -85,9 +85,11 @@ def augment_dataset(images_folder, labels_folder):
         # Read labels
         bboxes = []
         class_labels = []
-        with open(label_path, 'r') as f:
+        with open(label_path, "r") as f:
             for line in f:
-                class_id, x_center, y_center, width, height = map(float, line.strip().split())
+                class_id, x_center, y_center, width, height = map(
+                    float, line.strip().split()
+                )
                 x_min = (x_center - width / 2) * w
                 y_min = (y_center - height / 2) * h
                 x_max = (x_center + width / 2) * w
@@ -100,19 +102,17 @@ def augment_dataset(images_folder, labels_folder):
 
         # Apply augmentation
         augmented = augmentation_pipeline(
-            image=image,
-            bboxes=bboxes,
-            class_labels=class_labels
+            image=image, bboxes=bboxes, class_labels=class_labels
         )
-        aug_image = augmented['image']
-        aug_bboxes = augmented['bboxes']
-        aug_class_labels = augmented['class_labels']
+        aug_image = augmented["image"]
+        aug_bboxes = augmented["bboxes"]
+        aug_class_labels = augmented["class_labels"]
 
         # Save the augmented image over the original image
         thread_local.cv2.imwrite(image_path, aug_image)
 
         # Update labels
-        with open(label_path, 'w') as f:
+        with open(label_path, "w") as f:
             for bbox, class_id in zip(aug_bboxes, aug_class_labels):
                 x_min, y_min, x_max, y_max = bbox
                 x_center = ((x_min + x_max) / 2) / w
@@ -122,11 +122,13 @@ def augment_dataset(images_folder, labels_folder):
                 f.write(f"{class_id} {x_center} {y_center} {width} {height}\n")
 
     with ThreadPoolExecutor(max_workers=os.cpu_count()) as executor:
-        list(tqdm(
-            executor.map(process_image, image_files),
-            total=len(image_files),
-            desc="Augmenting images"
-        ))
+        list(
+            tqdm(
+                executor.map(process_image, image_files),
+                total=len(image_files),
+                desc="Augmenting images",
+            )
+        )
 
     print(f"Đã tăng cường dữ liệu cho {len(image_files)} ảnh có bbox.")
 
@@ -136,6 +138,7 @@ def main():
     train_labels_folder = "./data/soict-hackathon-2024_dataset/labels/train"
 
     augment_dataset(train_images_folder, train_labels_folder)
+
 
 if __name__ == "__main__":
     main()
