@@ -45,7 +45,11 @@ def patch_ultralytics():
             patch_path = patches_dir / patch_file
             if patch_path.exists():
                 try:
-                    shutil.copy2(patch_path, target_path)
+                    # Rename patch file to match the target file name
+                    temp_patch_path = patch_path.with_name(target_path.name)
+                    shutil.copy2(patch_path, temp_patch_path)
+                    shutil.copy2(temp_patch_path, target_path)
+                    temp_patch_path.unlink()  # Remove the temporary renamed file
                     print(f"Patched {target_path}")
                 except PermissionError:
                     if on_kaggle:
