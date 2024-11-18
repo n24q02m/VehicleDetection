@@ -54,8 +54,8 @@ def main():
     train_params = {
         "data": f"{data_dir}/data.yaml",
         "epochs": 300,
-        "time": 7,
-        "batch": -1,
+        "time": 8,
+        "batch": 4,
         "imgsz": 480,
         "cache": "disk",
         "device": 0,
@@ -67,6 +67,7 @@ def main():
         "cos_lr": True,
         "fraction": 1.0,
         "multi_scale": True,
+        "half": True,
         "augment": True,
         "show": True,
         "label_smoothing": 0.1,

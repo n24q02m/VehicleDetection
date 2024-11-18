@@ -71,6 +71,7 @@ def main(train_mode="new"):
         "cos_lr": True,
         "fraction": 1.0,
         "multi_scale": True,
+        "half": True,
         "augment": True,
         "show": True,
         "label_smoothing": 0.1,
