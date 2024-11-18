@@ -25,7 +25,7 @@ def main():
         raise Exception("Failed to download teacher model")
 
     # Verify teacher model exists
-    teacher_model_path = "./runs/finetuned-model/weights/best.pt"
+    teacher_model_path = "./model/finetuned_best.pt"
     if not os.path.exists(teacher_model_path):
         raise FileNotFoundError(
             f"Teacher model not found at {teacher_model_path}. "

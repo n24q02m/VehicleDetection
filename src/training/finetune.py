@@ -32,9 +32,9 @@ def main(train_mode="new"):
     patch_ultralytics()
 
     # Paths
-    model_dir = Path("./runs/finetuned-model/weights")
-    best_model_path = model_dir / "best.pt"
-    initial_model_path = "./models/yolo11x.pt"
+    model_dir = Path("./model")
+    best_model_path = model_dir / "finetuned_best.pt"
+    initial_model_path = model_dir / "yolo11x.pt"
     data_dir = "./data/soict-hackathon-2024_dataset"
     train_project = "./runs"
 

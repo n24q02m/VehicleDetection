@@ -33,26 +33,40 @@ def download_dataset(
 
 def download_model(
     model_name="n24q02m/finetuned-vehicle-detection-model",
-    model_dir="./runs/finetuned-model/weights",
+    model_dir="./model",
+    best_model_filename="finetuned_best.pt",
+    last_model_filename="finetuned_last.pt",
 ):
     """
-    Download pre-trained model if not exists locally.
+    Download pre-trained model if it does not exist locally.
 
     Args:
         model_name (str): Kaggle model name in format username/model-slug
         model_dir (str): Local directory to save model
+        best_model_filename (str): Filename for the best model
+        last_model_filename (str): Filename for the last model
     """
-    import kaggle
 
     if not os.path.exists(model_dir):
         print(f"Downloading model {model_name}...")
         os.makedirs(model_dir, exist_ok=True)
         try:
+            import kaggle
+
             kaggle.api.dataset_download_files(model_name, path=model_dir, unzip=True)
-            print("Model downloaded successfully.")
+
+            # Đổi tên các tệp mô hình
+            os.rename(
+                os.path.join(model_dir, "best.pt"),
+                os.path.join(model_dir, best_model_filename),
+            )
+            os.rename(
+                os.path.join(model_dir, "last.pt"),
+                os.path.join(model_dir, last_model_filename),
+            )
         except Exception as e:
             print(f"Error downloading model: {e}")
             return False
     else:
-        print("Model directory already exists. Skipping download.")
+        print(f"Model directory {model_dir} already exists.")
     return True
