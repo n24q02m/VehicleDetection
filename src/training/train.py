@@ -1,6 +1,7 @@
 import sys
 import os
 from pathlib import Path
+from datetime import datetime
 
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "../..")))
 
@@ -38,7 +39,10 @@ def main():
     model_name = "./models/yolov8-adsc.yaml"
     data_dir = "./data/soict-hackathon-2024_dataset"
     train_project = "./runs"
-    train_name = "final-model"
+
+    # Add timestamp to train_name
+    timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+    train_name = f"final-model_{timestamp}"
 
     # Read augmentation parameters from the text file
     augmentation_params = read_augmentation_parameters("./runs/mosaic_erasing.txt")
@@ -77,7 +81,7 @@ def main():
         model_name="n24q02m/final-vehicle-detection-model",
         model_dir=str(
             Path(
-                "./runs/final-model/weights",
+                f"./runs/{train_name}/weights",
             ).absolute()
         ),
         title="Final Vehicle Detection Model",

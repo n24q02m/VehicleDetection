@@ -1,6 +1,7 @@
 import sys
 import os
 from pathlib import Path
+from datetime import datetime
 
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "../..")))
 
@@ -12,7 +13,7 @@ from src.utils.auth import setup_kaggle_auth
 from src.utils.update import update_model
 
 
-def main():
+def main(train_mode="new"):
     # Set up Kaggle authentication
     if not setup_kaggle_auth():
         raise Exception("Failed to set up Kaggle authentication")
@@ -31,10 +32,21 @@ def main():
     patch_ultralytics()
 
     # Paths
-    model_name = "./models/yolo11x.pt"
+    model_dir = Path("./runs/finetuned-model/weights")
+    best_model_path = model_dir / "best.pt"
+    initial_model_path = "./models/yolo11x.pt"
     data_dir = "./data/soict-hackathon-2024_dataset"
     train_project = "./runs"
-    train_name = "finetuned-model"
+
+    # Add timestamp to train_name
+    timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+    train_name = f"finetuned-model_{timestamp}"
+
+    # Determine model path based on train_mode
+    if train_mode == "continue" and best_model_path.exists():
+        model_name = str(best_model_path)
+    else:
+        model_name = initial_model_path
 
     # Read augmentation parameters from the text file
     augmentation_params = read_augmentation_parameters("./runs/mosaic_erasing.txt")
@@ -71,10 +83,16 @@ def main():
     # Update model on Kaggle
     update_model(
         model_name="n24q02m/finetuned-vehicle-detection-model",
-        model_dir=str(Path("runs/finetuned-model/weights").absolute()),
+        model_dir=str(
+            Path(
+                f"./runs/{train_name}/weights",
+            ).absolute()
+        ),
         title="Finetuned Vehicle Detection Model",
     )
 
 
 if __name__ == "__main__":
-    main()
+    main(
+        train_mode="new"
+    )  # Change to "continue" if you want to continue training from best.pt
