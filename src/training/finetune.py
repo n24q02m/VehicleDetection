@@ -22,10 +22,7 @@ def main(train_mode="new"):
     download_dataset()
 
     # Download model from Kaggle
-    if not download_model(
-        model_name="n24q02m/finetuned-vehicle-detection-model",
-        model_dir="./runs/finetuned-model/weights",
-    ):
+    if not download_model():
         raise Exception("Failed to download finetuned model from Kaggle")
 
     # Apply patches when running locally
