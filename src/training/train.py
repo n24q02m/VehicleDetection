@@ -55,7 +55,7 @@ def main():
         "data": f"{data_dir}/data.yaml",
         "epochs": 300,
         "time": 8,
-        "batch": 4,
+        "batch": 6,
         "imgsz": 480,
         "cache": "disk",
         "device": 0,
