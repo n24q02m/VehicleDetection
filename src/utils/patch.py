@@ -2,6 +2,7 @@ import os
 import shutil
 from pathlib import Path
 
+
 def patch_ultralytics():
     """
     Patch Ultralytics package with custom modifications from patches directory.
@@ -44,15 +45,14 @@ def patch_ultralytics():
             patch_path = patches_dir / patch_file
             if patch_path.exists():
                 try:
-                    # Rename patch file to match the target file name
-                    temp_patch_path = patch_path.with_name(target_path.name)
-                    if patch_path != target_path:  # Ensure source and target are not the same
-                        shutil.copy2(patch_path, temp_patch_path)
-                        shutil.copy2(temp_patch_path, target_path)
-                        temp_patch_path.unlink()  # Remove the temporary renamed file
-                        print(f"Patched {target_path}")
-                    else:
-                        print(f"Source and target paths are the same for {target_path}. Skipping this patch.")
+                    if patch_path.resolve() == target_path.resolve():
+                        print(
+                            f"Error applying patches: {patch_path} and {target_path} are the same file"
+                        )
+                        continue
+                    target_path.parent.mkdir(parents=True, exist_ok=True)
+                    shutil.copyfile(patch_path, target_path)
+                    print(f"Patched {target_path}")
                 except PermissionError:
                     if on_kaggle:
                         print(

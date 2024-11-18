@@ -36,7 +36,7 @@ def main():
     patch_ultralytics()
 
     # Paths
-    model_name = "./models/yolov8-adsc.yaml"
+    model_name = "./models/yolov8m-adsc.yaml"
     data_dir = "./data/soict-hackathon-2024_dataset"
     train_project = "./runs"
 
