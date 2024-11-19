@@ -71,10 +71,10 @@ def main(train_mode="new"):
     train_params = {
         "data": f"{data_dir}/data.yaml",
         "epochs": 100,
-        "time": 3.5,
-        "batch": 12,
+        "time": 8,
+        "batch": 14,
         "imgsz": 480,
-        "cache": "disk",
+        "cache": True,
         "device": 0,
         "project": train_project,
         "name": train_name,

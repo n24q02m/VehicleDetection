@@ -62,10 +62,10 @@ def main(train_mode="new"):
     train_params = {
         "data": f"{data_dir}/data.yaml",
         "epochs": 100,
-        "time": 3.5,
-        "batch": 12,
+        "time": 8,
+        "batch": 14,
         "imgsz": 480,
-        "cache": "disk",
+        "cache": True,
         "device": 0,
         "project": train_project,
         "name": train_name,
@@ -100,5 +100,5 @@ def main(train_mode="new"):
 if __name__ == "__main__":
     os.system("set KMP_DUPLICATE_LIB_OK=TRUE")
     os.system("set PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True")
-    
+
     main(train_mode="continue")  # or "continue"
