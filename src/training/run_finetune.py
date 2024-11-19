@@ -17,6 +17,10 @@ else:
 os.system(f"yolo settings datasets_dir={dataset_dir}")
 
 # Chạy hàm main từ finetune.py
+import sys
+
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "../..")))
+
 from src.training.finetune import main as finetune_main
 
 finetune_main()

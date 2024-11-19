@@ -20,7 +20,7 @@ def download_dataset(
         os.makedirs(dataset_dir, exist_ok=True)
         try:
             kaggle.api.dataset_download_files(
-                dataset_name, path=dataset_dir, unzip=True
+                dataset_name, path=dataset_dir, unzip=True, quiet=False
             )
             print("Dataset downloaded and extracted.")
         except Exception as e:
@@ -33,7 +33,7 @@ def download_dataset(
 
 def download_model(
     model_name="n24q02m/finetuned-vehicle-detection-model",
-    model_dir="./model",
+    model_dir="./models",
     best_model_filename="finetuned_best.pt",
     last_model_filename="finetuned_last.pt",
 ):
@@ -47,26 +47,23 @@ def download_model(
         last_model_filename (str): Filename for the last model
     """
 
-    if not os.path.exists(model_dir):
-        print(f"Downloading model {model_name}...")
-        os.makedirs(model_dir, exist_ok=True)
-        try:
-            import kaggle
+    print(f"Downloading model {model_name}...")
+    os.makedirs(model_dir, exist_ok=True)
+    try:
+        import kaggle
 
-            kaggle.api.dataset_download_files(model_name, path=model_dir, unzip=True)
+        kaggle.api.dataset_download_files(model_name, path=model_dir, unzip=True, quiet=False)
 
-            # Đổi tên các tệp mô hình
-            os.rename(
-                os.path.join(model_dir, "best.pt"),
-                os.path.join(model_dir, best_model_filename),
-            )
-            os.rename(
-                os.path.join(model_dir, "last.pt"),
-                os.path.join(model_dir, last_model_filename),
-            )
-        except Exception as e:
-            print(f"Error downloading model: {e}")
-            return False
-    else:
-        print(f"Model directory {model_dir} already exists.")
+        # Đổi tên các tệp mô hình
+        os.rename(
+            os.path.join(model_dir, "best.pt"),
+            os.path.join(model_dir, best_model_filename),
+        )
+        os.rename(
+            os.path.join(model_dir, "last.pt"),
+            os.path.join(model_dir, last_model_filename),
+        )
+    except Exception as e:
+        print(f"Error downloading model: {e}")
+        return False
     return True
