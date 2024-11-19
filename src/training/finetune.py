@@ -65,7 +65,7 @@ def main(train_mode="new"):
         "time": 8,
         "batch": 14,
         "imgsz": 480,
-        "cache": True,
+        "cache": "disk",
         "device": 0,
         "project": train_project,
         "name": train_name,
