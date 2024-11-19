@@ -16,8 +16,6 @@ else:
 # Set YOLO dataset directory
 os.system(f"yolo settings datasets_dir={dataset_dir}")
 
-os.system("set KMP_DUPLICATE_LIB_OK=TRUE")
-
 # Chạy hàm main từ train.py
 import sys
 
@@ -25,7 +23,7 @@ sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "../..")
 
 from src.training.train import main as train_main
 
-train_main()
+train_main(train_mode="continue")
 
 from src.utils.gitaction import git_push_changes
 
