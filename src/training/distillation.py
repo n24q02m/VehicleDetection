@@ -1,3 +1,4 @@
+import os
 from copy import copy
 
 from ultralytics import YOLO
@@ -8,11 +9,16 @@ from ultralytics.utils import LOGGER
 import torch
 import torch.nn.functional as F
 
+
 class DistillationTrainer(DetectionTrainer):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
-        # Load teacher model
-        self.teacher_model = YOLO("./runs/finetune_yolo11x/weights/best.pt")
+        # Load teacher model from downloaded path
+        self.teacher_model = YOLO("./model/finetuned_best.pt")
+        if not os.path.exists(self.teacher_model.ckpt_path):
+            raise FileNotFoundError(
+                "Teacher model not found. Please run finetune.py first or ensure the model is downloaded."
+            )
         self.teacher_model.model.to(self.device)
         self.teacher_model.model.eval()  # Set teacher model to evaluation mode
         for param in self.teacher_model.model.parameters():
@@ -24,10 +30,10 @@ class DistillationTrainer(DetectionTrainer):
         """Returns a DistillationValidator for validation with teacher model."""
         self.loss_names = ("box_loss", "cls_loss", "dfl_loss", "kd_loss")
         validator = DistillationValidator(
-            self.test_loader, 
+            self.test_loader,
             save_dir=self.save_dir,
             args=copy(self.args),
-            _callbacks=self.callbacks
+            _callbacks=self.callbacks,
         )
         validator.teacher_model = self.teacher_model  # Pass teacher model to validator
         return validator
@@ -86,14 +92,18 @@ class DistillationTrainer(DetectionTrainer):
         """
         keys = [f"{prefix}/{x}" for x in self.loss_names + ("kd_loss",)]
         if loss_items is not None:
-            loss_items = [round(float(x), 5) for x in loss_items]  # convert tensors to 5 decimal place floats
+            loss_items = [
+                round(float(x), 5) for x in loss_items
+            ]  # convert tensors to 5 decimal place floats
             return dict(zip(keys, loss_items))
         else:
             return keys
 
 
 class DistillationValidator(DetectionValidator):
-    def __init__(self, dataloader=None, save_dir=None, pbar=None, args=None, _callbacks=None):
+    def __init__(
+        self, dataloader=None, save_dir=None, pbar=None, args=None, _callbacks=None
+    ):
         super().__init__(dataloader, save_dir, pbar, args, _callbacks)
         self.loss_names = ("box_loss", "cls_loss", "dfl_loss", "kd_loss")
         self.teacher_model = None  # Will be set by DistillationTrainer
@@ -120,9 +130,13 @@ class DistillationValidator(DetectionValidator):
 
         return total_loss, loss_items
 
-    def compute_kd_loss(self, student_logits, teacher_logits, temperature=5.0, alpha=0.5):
+    def compute_kd_loss(
+        self, student_logits, teacher_logits, temperature=5.0, alpha=0.5
+    ):
         """Compute knowledge distillation loss."""
         p_teacher = F.softmax(teacher_logits / temperature, dim=1)
         p_student = F.log_softmax(student_logits / temperature, dim=1)
-        kd_loss = F.kl_div(p_student, p_teacher, reduction="batchmean") * (temperature**2)
+        kd_loss = F.kl_div(p_student, p_teacher, reduction="batchmean") * (
+            temperature**2
+        )
         return alpha * kd_loss

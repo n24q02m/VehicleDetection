@@ -1,45 +1,51 @@
-"""
-    - Chỉnh sửa dòng 692 file ultralytics/ultralytics/utils/check.py từ:
-    ```
-assert amp_allclose(YOLO("yolo11n.pt"), im)
-    ```
-    thành:
-    ```
-assert amp_allclose(YOLO("yolov8m-ghost-p2.yaml"), im)
-    ```
-"""
+import sys
+import os
+from pathlib import Path
+from datetime import datetime
+
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "../..")))
 
 from ultralytics import YOLO
-from distillation import DistillationTrainer
+from src.training.distillation import DistillationTrainer
+from src.utils.patch import patch_ultralytics
+from src.utils.read import read_augmentation_parameters
+from src.utils.download import download_dataset, download_model
+from src.utils.auth import setup_kaggle_auth
+from src.utils.update import update_model
 
 
-def read_augmentation_parameters(file_path):
-    params = {}
-    with open(file_path, "r", encoding="utf-8") as f:
-        for line in f:
-            if line.strip():
-                key_value = line.strip().split(maxsplit=1)
-                if len(key_value) == 2:
-                    key, value = key_value
-                    try:
-                        value = float(value)
-                    except ValueError:
-                        pass
-                    params[key] = value
-    return params
+def main():
+    # Set up Kaggle authentication
+    if not setup_kaggle_auth():
+        raise Exception("Failed to set up Kaggle authentication")
 
+    # Download data and model if needed
+    download_dataset()
+    if not download_model():  # Check if model download was successful
+        raise Exception("Failed to download teacher model")
 
-if __name__ == "__main__":
+    # Verify teacher model exists
+    teacher_model_path = "./model/finetuned_best.pt"
+    if not os.path.exists(teacher_model_path):
+        raise FileNotFoundError(
+            f"Teacher model not found at {teacher_model_path}. "
+            "Please ensure finetune.py was run first or the model was downloaded correctly."
+        )
+
+    # Apply patches when running locally
+    # patch_ultralytics()
+
     # Paths
-    model_name = "./models/custom-yolov8m-ghost-p2.yaml"
+    model_name = "./models/yolov8m-ghost.yaml"
     data_dir = "./data/soict-hackathon-2024_dataset"
     train_project = "./runs"
-    train_name = "distillation_custom-yolov8m-ghost-p2"
+
+    # Add timestamp to train_name
+    timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+    train_name = f"final-model_{timestamp}"
 
     # Read augmentation parameters from the text file
-    augmentation_params = read_augmentation_parameters(
-        "./runs/augmentation_parameters.txt"
-    )
+    augmentation_params = read_augmentation_parameters("./runs/mosaic_erasing.txt")
 
     # Initialize the student model
     model = YOLO(model_name)
@@ -47,9 +53,10 @@ if __name__ == "__main__":
     # Training parameters
     train_params = {
         "data": f"{data_dir}/data.yaml",
-        "epochs": 600,
-        "time": 0.5,
-        "batch": -1,
+        "epochs": 300,
+        "time": 4,
+        "batch": 8,
+        "imgsz": 480,
         "cache": "disk",
         "device": 0,
         "project": train_project,
@@ -58,8 +65,9 @@ if __name__ == "__main__":
         "optimizer": "auto",
         "seed": 42,
         "cos_lr": True,
-        "fraction": 0.1,
+        "fraction": 1.0,
         "multi_scale": True,
+        "half": True,
         "augment": True,
         "show": True,
         "label_smoothing": 0.1,
@@ -68,3 +76,18 @@ if __name__ == "__main__":
 
     # Start training with the custom distillation trainer
     model.train(trainer=DistillationTrainer, **train_params)
+
+    # Update model on Kaggle
+    update_model(
+        model_name="n24q02m/final-vehicle-detection-model",
+        model_dir=str(
+            Path(
+                f"./runs/{train_name}/weights",
+            ).absolute()
+        ),
+        title="Final Vehicle Detection Model",
+    )
+
+
+if __name__ == "__main__":
+    main()

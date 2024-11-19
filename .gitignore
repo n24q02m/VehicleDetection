@@ -168,7 +168,11 @@ cython_debug/
 *.zip
 *.npy
 export/
+data/
+!src/data/
 *.pt
+runs/**/labels/
+runs/**/weights/
 
 # IDEs
 .idea/
