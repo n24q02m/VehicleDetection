@@ -98,4 +98,7 @@ def main(train_mode="new"):
 
 
 if __name__ == "__main__":
+    os.system("set KMP_DUPLICATE_LIB_OK=TRUE")
+    os.system("set PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True")
+    
     main(train_mode="continue")  # or "continue"
