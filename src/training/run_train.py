@@ -17,6 +17,10 @@ else:
 os.system(f"yolo settings datasets_dir={dataset_dir}")
 
 # Chạy hàm main từ train.py
+import sys
+
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "../..")))
+
 from src.training.train import main as train_main
 
 train_main()

@@ -26,12 +26,15 @@ def main(train_mode="new"):
         raise Exception("Failed to download finetuned model from Kaggle")
 
     # Apply patches when running locally
-    # patch_ultralytics()
+    patch_ultralytics()
+
+    yolo_model_name = "yolo11x.pt"
+    yolo_model = YOLO(yolo_model_name)
 
     # Paths
-    model_dir = Path("./model")
+    model_dir = Path("./models")
     best_model_path = model_dir / "finetuned_best.pt"
-    initial_model_path = model_dir / "yolo11x.pt"
+    initial_model_path = model_dir / "yolo_model_name"
     data_dir = "./data/soict-hackathon-2024_dataset"
     train_project = "./runs"
 
@@ -58,9 +61,9 @@ def main(train_mode="new"):
     # Training parameters
     train_params = {
         "data": f"{data_dir}/data.yaml",
-        "epochs": 300,
-        "time": 8,
-        "batch": 6,
+        "epochs": 100,
+        "time": 5,
+        "batch": -1,
         "imgsz": 480,
         "cache": "disk",
         "device": 0,
@@ -95,4 +98,4 @@ def main(train_mode="new"):
 
 
 if __name__ == "__main__":
-    main(train_mode="new")  # or "continue"
+    main(train_mode="continue")  # or "continue"

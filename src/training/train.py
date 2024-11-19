@@ -33,12 +33,12 @@ def main(train_mode="new"):
         )
 
     # Apply patches when running locally
-    # patch_ultralytics()
+    patch_ultralytics()
 
     # Paths
-    model_dir = Path("./model")
+    model_dir = Path("./models")
     best_model_path = model_dir / "final_best.pt"
-    initial_model_path = model_dir / "yolov8m-ghost.yaml"
+    initial_model_path = model_dir / "yolov8m-adsc.yaml"
     data_dir = "./data/soict-hackathon-2024_dataset"
     train_project = "./runs"
 
@@ -70,9 +70,9 @@ def main(train_mode="new"):
     # Training parameters
     train_params = {
         "data": f"{data_dir}/data.yaml",
-        "epochs": 300,
-        "time": 4,
-        "batch": 8,
+        "epochs": 100,
+        "time": 5,
+        "batch": -1,
         "imgsz": 480,
         "cache": "disk",
         "device": 0,

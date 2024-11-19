@@ -20,7 +20,7 @@ def download_dataset(
         os.makedirs(dataset_dir, exist_ok=True)
         try:
             kaggle.api.dataset_download_files(
-                dataset_name, path=dataset_dir, unzip=True
+                dataset_name, path=dataset_dir, unzip=True, quiet=False
             )
             print("Dataset downloaded and extracted.")
         except Exception as e:
@@ -33,7 +33,7 @@ def download_dataset(
 
 def download_model(
     model_name="n24q02m/finetuned-vehicle-detection-model",
-    model_dir="./model",
+    model_dir="./models",
     best_model_filename="finetuned_best.pt",
     last_model_filename="finetuned_last.pt",
 ):
@@ -47,13 +47,12 @@ def download_model(
         last_model_filename (str): Filename for the last model
     """
 
-
     print(f"Downloading model {model_name}...")
     os.makedirs(model_dir, exist_ok=True)
     try:
         import kaggle
 
-        kaggle.api.dataset_download_files(model_name, path=model_dir, unzip=True)
+        kaggle.api.dataset_download_files(model_name, path=model_dir, unzip=True, quiet=False)
 
         # Đổi tên các tệp mô hình
         os.rename(
