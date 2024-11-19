@@ -11,7 +11,7 @@ if "KAGGLE_URL_BASE" in os.environ:
     dataset_dir = "/kaggle/working/VehicleDetection/data/soict-hackathon-2024_dataset"
 else:
     # Trên máy ảo
-    dataset_dir = "C:\\Users\\Administrator\\Desktop\\VehicleDetection\\src\\data\\soict-hackathon-2024_dataset"
+    dataset_dir = "C:\\Users\\Administrator\\Desktop\\VehicleDetection\\data\\soict-hackathon-2024_dataset"
 
 # Set YOLO dataset directory
 os.system(f"yolo settings datasets_dir={dataset_dir}")
