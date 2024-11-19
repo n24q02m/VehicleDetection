@@ -50,7 +50,7 @@ def download_model(
     best_model_path = os.path.join(model_dir, best_model_filename)
     last_model_path = os.path.join(model_dir, last_model_filename)
 
-    if os.path.exists(best_model_path) and os.path.exists(last_model_path):
+    if not os.path.exists(best_model_path) and not os.path.exists(last_model_path):
         print(f"Downloading model {model_name}...")
         os.makedirs(model_dir, exist_ok=True)
         try:
