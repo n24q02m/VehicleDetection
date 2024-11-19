@@ -14,7 +14,7 @@ class DistillationTrainer(DetectionTrainer):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         # Load teacher model from downloaded path
-        self.teacher_model = YOLO("./model/finetuned_best.pt")
+        self.teacher_model = YOLO("./models/finetuned_best.pt")
         if not os.path.exists(self.teacher_model.ckpt_path):
             raise FileNotFoundError(
                 "Teacher model not found. Please run finetune.py first or ensure the model is downloaded."
