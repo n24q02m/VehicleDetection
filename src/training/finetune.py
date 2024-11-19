@@ -26,7 +26,7 @@ def main(train_mode="new"):
         raise Exception("Failed to download finetuned model from Kaggle")
 
     # Apply patches when running locally
-    patch_ultralytics()
+    # patch_ultralytics()
 
     yolo_model_name = "yolo11x.pt"
     yolo_model = YOLO(yolo_model_name)

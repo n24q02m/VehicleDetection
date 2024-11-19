@@ -33,7 +33,7 @@ def main(train_mode="new"):
         )
 
     # Apply patches when running locally
-    patch_ultralytics()
+    # patch_ultralytics()
 
     # Paths
     model_dir = Path("./models")
