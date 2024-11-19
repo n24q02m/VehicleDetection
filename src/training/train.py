@@ -24,6 +24,13 @@ def main(train_mode="new"):
     if not download_model():
         raise Exception("Failed to download teacher model")
 
+    if not download_model(
+        model_name="n24q02m/final-vehicle-detection-model",
+        best_model_filename="final_best.pt",
+        last_model_filename="final_last.pt",
+    ):
+        raise Exception("Failed to download final model from Kaggle")
+
     # Verify teacher model exists
     teacher_model_path = "./models/finetuned_best.pt"
     if not os.path.exists(teacher_model_path):
@@ -48,11 +55,6 @@ def main(train_mode="new"):
 
     # Determine model path based on train_mode
     if train_mode == "continue":
-        if not download_model(
-            model_name="n24q02m/final-vehicle-detection-model",
-            best_model_filename="final_best.pt",
-        ):
-            raise Exception("Failed to download final model from Kaggle")
         model_name = str(best_model_path)
     else:
         model_name = initial_model_path
