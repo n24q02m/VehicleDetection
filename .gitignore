@@ -173,6 +173,7 @@ data/
 *.pt
 runs/**/labels/
 runs/**/weights/
+models/labels/
 
 # IDEs
 .idea/

@@ -96,8 +96,8 @@ def zip_output(output_file):
 def main():
     # Set up paths based on model directory
     
-    model_path = "./model/final_best.pt"
-    model_dir = str(Path(model_path).parent.parent)  # Get model session directory
+    model_dir = "./models"
+    best_model_path = os.path.join(model_dir, "final_best.pt")
 
     test_zip = "./data/public test.zip"
     test_dir = "./data/public test"  # Define expected test directory
@@ -113,7 +113,7 @@ def main():
         print("Đã tồn tại thư mục test, bỏ qua bước giải nén.")
 
     # Perform prediction and write results
-    predict_images(model_path, test_dir, output_file, labels_dir)
+    predict_images(best_model_path, test_dir, output_file, labels_dir)
 
     # Zip the output file
     zip_output(output_file)
@@ -123,7 +123,7 @@ def main():
 if __name__ == "__main__":
     download_model(
         model_name="n24q02m/final-vehicle-detection-model",
-        model_dir="./model",
+        model_dir="./models",
         best_model_filename="final_best.pt",
         last_model_filename="final_last.pt",
     )
