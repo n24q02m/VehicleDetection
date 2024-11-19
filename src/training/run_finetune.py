@@ -16,6 +16,9 @@ else:
 # Set YOLO dataset directory
 os.system(f"yolo settings datasets_dir={dataset_dir}")
 
+os.system("set KMP_DUPLICATE_LIB_OK=TRUE")
+os.system("set PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True")
+
 # Chạy hàm main từ finetune.py
 import sys
 
