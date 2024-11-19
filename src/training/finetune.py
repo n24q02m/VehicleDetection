@@ -34,7 +34,7 @@ def main(train_mode="new"):
     # Paths
     model_dir = Path("./models")
     best_model_path = model_dir / "finetuned_best.pt"
-    initial_model_path = model_dir / "yolo_model_name"
+    initial_model_path = model_dir / yolo_model_name
     data_dir = "./data/soict-hackathon-2024_dataset"
     train_project = "./runs"
 
