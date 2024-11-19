@@ -47,23 +47,35 @@ def download_model(
         last_model_filename (str): Filename for the last model
     """
 
-    print(f"Downloading model {model_name}...")
-    os.makedirs(model_dir, exist_ok=True)
-    try:
-        import kaggle
+    best_model_path = os.path.join(model_dir, best_model_filename)
+    last_model_path = os.path.join(model_dir, last_model_filename)
 
-        kaggle.api.dataset_download_files(model_name, path=model_dir, unzip=True, quiet=False)
+    if os.path.exists(best_model_path) and os.path.exists(last_model_path):
+        print(f"Downloading model {model_name}...")
+        os.makedirs(model_dir, exist_ok=True)
+        try:
+            import kaggle
 
-        # Đổi tên các tệp mô hình
-        os.rename(
-            os.path.join(model_dir, "best.pt"),
-            os.path.join(model_dir, best_model_filename),
+            kaggle.api.dataset_download_files(
+                model_name, path=model_dir, unzip=True, quiet=False
+            )
+
+            # Đổi tên các tệp mô hình
+            os.rename(
+                os.path.join(model_dir, "best.pt"),
+                os.path.join(model_dir, best_model_filename),
+            )
+            os.rename(
+                os.path.join(model_dir, "last.pt"),
+                os.path.join(model_dir, last_model_filename),
+            )
+        except Exception as e:
+            print(f"Error downloading model: {e}")
+            return False
+
+    else:
+        print(
+            f"Models {best_model_filename} and {last_model_filename} already exist. Skipping download."
         )
-        os.rename(
-            os.path.join(model_dir, "last.pt"),
-            os.path.join(model_dir, last_model_filename),
-        )
-    except Exception as e:
-        print(f"Error downloading model: {e}")
-        return False
+
     return True
