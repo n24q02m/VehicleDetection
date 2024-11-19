@@ -5,7 +5,6 @@ from tqdm import tqdm
 from ultralytics import YOLO
 import torch
 from pathlib import Path
-from preprocess_image import preprocess_image
 
 model_name = "better-train-yolov8m-ghost-p2"
 
@@ -47,18 +46,10 @@ def predict_images(model_path, images_dir, output_file, labels_dir):
             for file in tqdm(files, desc="Predicting"):
                 if file.lower().endswith((".jpg", ".jpeg", ".png")):
                     image_path = os.path.join(root, file)
-                    image = cv2.imread(image_path)
-                    if image is None:
-                        print(f"Không thể đọc file ảnh: {image_path}")
-                        continue
-
-                    image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)  # Chuyển đổi từ BGR sang RGB
-                    processed_image = preprocess_image(image)
-                    processed_image = cv2.cvtColor(processed_image, cv2.COLOR_RGB2BGR)  # Chuyển đổi từ RGB sang BGR
 
                     # Perform prediction using YOLO
                     results = model.predict(
-                        source=processed_image,
+                        source=image_path,
                         conf=0.25,
                         iou=0.7,
                         device=0,
