@@ -14,14 +14,14 @@ from src.utils.auth import setup_kaggle_auth
 from src.utils.update import update_model
 
 
-def main():
+def main(train_mode="new"):
     # Set up Kaggle authentication
     if not setup_kaggle_auth():
         raise Exception("Failed to set up Kaggle authentication")
 
     # Download data and model if needed
     download_dataset()
-    if not download_model():  # Check if model download was successful
+    if not download_model():
         raise Exception("Failed to download teacher model")
 
     # Verify teacher model exists
@@ -36,13 +36,30 @@ def main():
     # patch_ultralytics()
 
     # Paths
-    model_name = "./models/yolov8m-ghost.yaml"
+    model_dir = Path("./model")
+    best_model_path = model_dir / "final_best.pt"
+    initial_model_path = model_dir / "yolov8m-ghost.yaml"
     data_dir = "./data/soict-hackathon-2024_dataset"
     train_project = "./runs"
 
     # Add timestamp to train_name
     timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
     train_name = f"final-model_{timestamp}"
+
+    # Determine model path based on train_mode
+    if train_mode == "continue":
+        if not download_model(
+            model_name="n24q02m/final-vehicle-detection-model",
+            best_model_filename="final_best.pt",
+        ):
+            raise Exception("Failed to download final model from Kaggle")
+        model_name = str(best_model_path)
+    else:
+        model_name = initial_model_path
+
+    # Verify model exists
+    if not os.path.exists(model_name):
+        raise FileNotFoundError(f"Model not found at {model_name}.")
 
     # Read augmentation parameters from the text file
     augmentation_params = read_augmentation_parameters("./runs/mosaic_erasing.txt")
@@ -90,4 +107,4 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    main(train_mode="new")  # Hoặc "continue"

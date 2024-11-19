@@ -26,7 +26,7 @@ def main(train_mode="new"):
         raise Exception("Failed to download finetuned model from Kaggle")
 
     # Apply patches when running locally
-    patch_ultralytics()
+    # patch_ultralytics()
 
     # Paths
     model_dir = Path("./model")
@@ -44,6 +44,10 @@ def main(train_mode="new"):
         model_name = str(best_model_path)
     else:
         model_name = initial_model_path
+
+    # Verify model exists
+    if not os.path.exists(model_name):
+        raise FileNotFoundError(f"Model not found at {model_name}.")
 
     # Read augmentation parameters from the text file
     augmentation_params = read_augmentation_parameters("./runs/mosaic_erasing.txt")
@@ -91,6 +95,4 @@ def main(train_mode="new"):
 
 
 if __name__ == "__main__":
-    main(
-        train_mode="new"
-    )  # Change to "continue" if you want to continue training from best.pt
+    main(train_mode="new")  # or "continue"
