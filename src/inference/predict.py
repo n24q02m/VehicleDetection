@@ -1,10 +1,14 @@
 import os
-import cv2
 import zipfile
 from tqdm import tqdm
 from ultralytics import YOLO
 import torch
 from pathlib import Path
+import sys
+
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "../..")))
+
+from src.utils.download import download_model
 
 model_name = "better-train-yolov8m-ghost-p2"
 
@@ -92,7 +96,7 @@ def zip_output(output_file):
 def main():
     # Set up paths based on model directory
     
-    model_path = f"./runs/{model_name}/weights/best.pt"
+    model_path = "./model/final_best.pt"
     model_dir = str(Path(model_path).parent.parent)  # Get model session directory
 
     test_zip = "./data/public test.zip"
@@ -117,4 +121,10 @@ def main():
     print("Hoàn thành!")
 
 if __name__ == "__main__":
+    download_model(
+        model_name="n24q02m/final-vehicle-detection-model",
+        model_dir="./model",
+        best_model_filename="final_best.pt",
+        last_model_filename="final_last.pt",
+    )
     main()
