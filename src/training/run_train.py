@@ -16,6 +16,8 @@ else:
 # Set YOLO dataset directory
 os.system(f"yolo settings datasets_dir={dataset_dir}")
 
+os.system("set KMP_DUPLICATE_LIB_OK=TRUE")
+
 # Chạy hàm main từ train.py
 import sys
 
