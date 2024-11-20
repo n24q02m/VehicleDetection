@@ -14,7 +14,7 @@ from src.utils.auth import setup_kaggle_auth
 from src.utils.update import update_model
 
 
-def main(train_mode="new"):
+def main(train_mode="new", train_time=None, train_batch=-1):
     # Set up Kaggle authentication
     if not setup_kaggle_auth():
         raise Exception("Failed to set up Kaggle authentication")
@@ -73,8 +73,8 @@ def main(train_mode="new"):
     train_params = {
         "data": f"{data_dir}/data.yaml",
         "epochs": 100,
-        "time": 8,
-        "batch": 14,
+        "time": train_time,
+        "batch": train_batch,
         "imgsz": 480,
         "cache": "disk",
         "device": 0,
@@ -112,4 +112,4 @@ if __name__ == "__main__":
     os.system("set KMP_DUPLICATE_LIB_OK=TRUE")
     os.system("set PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True")
 
-    main(train_mode="continue")  # Hoặc "continue"
+    main(train_mode="continue", train_time=8, train_batch=14)  # Hoặc "continue"
