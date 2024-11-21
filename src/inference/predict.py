@@ -3,7 +3,6 @@ import zipfile
 from tqdm import tqdm
 from ultralytics import YOLO
 import torch
-from pathlib import Path
 import sys
 
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "../..")))

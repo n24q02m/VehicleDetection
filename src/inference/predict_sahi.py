@@ -4,7 +4,11 @@ from tqdm import tqdm
 from sahi import AutoDetectionModel
 from sahi.predict import get_sliced_prediction
 import torch
-from pathlib import Path
+import sys
+
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "../..")))
+
+from src.utils.download import download_model
 
 
 def extract_zip(zip_path):
@@ -94,13 +98,13 @@ def zip_output(output_file):
 
 def main():
     # Set up paths based on model directory
-    model_path = "./runs/better-train-yolov8m-ghost-p2/weights/best.pt"
-    model_dir = str(Path(model_path).parent.parent)  # Get model session directory
+    model_dir = "./models"
+    best_model_path = os.path.join(model_dir, "final_best.pt")
     
     test_zip = "./data/public test.zip"
     test_dir = "./data/public test"  # Define expected test directory
-    output_file = os.path.join(model_dir, "predict_sahi.txt")
-    labels_dir = os.path.join(model_dir, "labels_sahi")
+    output_file = os.path.join(model_dir, "sahi", "predict.txt")
+    labels_dir = os.path.join(model_dir, "sahi", "labels")
 
     # Check if test directory already exists
     if not os.path.exists(test_dir):
@@ -111,7 +115,7 @@ def main():
         print("Đã tồn tại thư mục test, bỏ qua bước giải nén.")
 
     # Perform prediction and write results
-    predict_images(model_path, test_dir, output_file, labels_dir)
+    predict_images(best_model_path, test_dir, output_file, labels_dir)
 
     # Zip the output file
     zip_output(output_file)
@@ -120,4 +124,10 @@ def main():
 
 
 if __name__ == "__main__":
+    download_model(
+        model_name="n24q02m/final-vehicle-detection-model",
+        model_dir="./models",
+        best_model_filename="final_best.pt",
+        last_model_filename="final_last.pt",
+    )
     main()
